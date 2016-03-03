@@ -75,7 +75,7 @@ A look at how little code has been used to achieve a fully dynamic todo applicat
 ## Refactor our application to use the pods structure and components
 
 
--# Matt
+-# Matt Pt 1 Making a simple Ember App
 
 # Making an Ember App
 
@@ -124,4 +124,48 @@ Ember CLI is to Ember what Artisan is to Laravel. It contains a lot of helpful c
 
 ## Generating the first route
 
+# Building a Todo App
 
+## Templates
+
+## Creating
+
+## Deleting
+
+## Checking
+
+-# Matt Part 2 - A more ambitious app
+
+# Introduction
+
+What is the intention, what are we planning to build, how we're going to structure it in two separate apps and work on them independently, etc.
+
+# First, an API
+
+## What is an API?
+
+## Keeping it RESTful
+
+## An established spec - JSON API
+
+# Building an API in Laravel
+
+Thankfully, Laravel is an exceptional tool to build an API in. It supports JSON output natively, and can be rapidly able to supply the app with data.
+
+## Determining resource entities, generating, creating, etc
+
+## Making an API that plays nicely with Ember
+
+# Make Another Ember App
+
+# Ember Data
+
+## Using Adapters
+
+## Connecting to an API
+
+## Proxying an API
+
+## Implementing CORS
+
+# The rest of the book
