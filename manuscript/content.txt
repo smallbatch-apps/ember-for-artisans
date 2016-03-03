@@ -1,0 +1,97 @@
+-# Greg
+
+# Getting started
+
+## Setting up your environment (inc. PHPStorm to use .editorconfig)
+## Project layout (2 repositories etc)
+## Finding help
+
+# The Ember ecosystem
+## Model View Controller vs Model Router Component
+## Nomenclature differences
+## Responsibilities of each layer
+## Router first
+## How the URL is the most important part of Ember
+## The router state machine
+
+# Building a simple todo application
+## Walk through building a basic client side todo application in the traditional “todomvc” style
+## Ember data and the API
+## Common approaches (JSONAPI vs RESTful adapters)
+## HTTP status codes
+## Dealing with errors
+
+# Designing an Ember friendly API in laravel
+## League/Fractal transformers
+## Middleware for serialization (we want to still just be able to return results from the server in the traditional Ember sense - use Middleware to handle serialization)
+
+# Data driven todo application
+
+Refactor the todo application in chapter 5 to deal with persistence
+
+# Query params
+
+So far, endpoints have been simple. Make them queryable while maintaining bookmarkable pages.
+
+# Add a search function to our todo application
+
+# Ember Addons
+## Introduction to Ember Addons - adding moment.js to our todo application
+## Transition animation
+## Introduction to LiquidFire
+## Authentication
+## Adding JWT to your application using tymondesigns/jwt and ember-simple-auth-token
+
+# Recap
+
+A look at how little code has been used to achieve a fully dynamic todo application
+
+# Ember testing
+## Look at the ember testing story, differences between integration and unit testing.
+## Refactoring
+## Refactor our application to use the pods structure and components
+
+-# Matt
+
+# Making an Ember App
+
+In this chapter we will begin creating a very basic Ember application. It's a stand-alone app, and has no database layer, so Laravel is not a factor here.
+
+This will just be a simple list of ToDo items, so we can take a clean look at a well-known standard app that steps just a little beyond "Hello World" without wandering into complex business requirements or confusing syntax. In some ways this is a bad choice. The true benefits of a framework like Ember (or Laravel for that matter) are only realised with more complicated projects. It's important to bear that in mind with tutorials such as this. In order to be useful as a teaching aid it almost by definition can't be complicated enough to need what's being taught.
+
+## Installing the Ember CLI
+
+## Creating a new app
+
+This is a great place to highlight the simplicity of creating an Ember project, and I think it really needs to be a key chapter.
+
+# Anatomy of an Ember App
+
+## Similar to Laravel - but differences can be tricky
+## ES6/ES2015
+## Router
+## Routes vs Controllers
+
+One of the biggest differences between Laravel and Ember is in the role of a "Controller". Given that both frameworks are MVC frameworks and the C is "controller", it makes sense that they're both there. In Laravel the Controller is an intermediary between the router and the model, getting model data for the request, and returning it as a response. In Ember, that role is handled by the Route object. The controller is more about decorating the model data for display. Note that this is purely a name difference. The role of the Route is functionally hugely similar to a Laravel controller.
+
+## Templates
+
+HTMLBars not dissimilar to Blade syntax, with moustache based templates being used to display data.
+
+## Models
+
+A model backs a route, and the default implementation is an Ember Data model. This is OK because the Ember Data model looks pretty similar to a Laravel Eloquent Model. The App does not need to use Ember Data, though. POJOs are fine.
+
+## Components
+
+
+# Ember CLI
+
+Ember CLI is to Ember what Artisan is to Laravel. It contains a lot of helpful command-line tools that maintain consistency, and makes Ember a simpler and more developer friendly environment. Ember CLI has now become a core feature of Ember, and does a lot of stuff like building, live-reload, serving, generation, etc, all of which eat a chain of dicks in other frameworks. Ember CLI also contains a lot of Ember addons by default.
+
+## Ember Serve
+## Compiling, concatenating, building, and transpiling with Broccolli
+## Installing Bootstrap and FontAwesome Addons
+## Generating the first route
+
+

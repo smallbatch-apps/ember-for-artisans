@@ -1,0 +1,7 @@
+{frontmatter}
+
+# Introduction
+
+What is the intention of this book. Why Ember, what it's good for and how it compares to other frameworks, what it's good at, and what it's not.
+
+{mainmatter}
