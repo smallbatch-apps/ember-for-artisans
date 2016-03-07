@@ -2,6 +2,19 @@
 
 # Introduction
 
-What is the intention of this book. Why Ember, what it's good for and how it compares to other frameworks, what it's good at, and what it's not.
+This book is intended for Laravel developers looking to build complex and intuitive front-end applications, specifically Single Page Apps.
+
+It isn't intended to teach Laravel, though it does touch on a lot of subjects related to creating and optimising an API built in Laravel. As such it assumes a basic familiarity with the Laravel framework. It uses this familiarity to compare and contrast related Ember functionality.
+
+## Why Ember?
+
+The first thing to talk about is the obvious one. Why Ember? Why use Ember instead of the other frameworks around, such as VueJS, Angular, or React? Criticising those frameworks is pointless, everyone has things they do and don't like about them, and one person's con can be an person's pro. What is a more objective statement is that Ember is (by a considerable amount) the most comprehensive and "frameworky" of all Javascript frameworks.
+
+I've seen nearly everything referred to as the most "Laravel-like" JS framework, but it's hard to know how they mean that or what the actual similarities are. But with Ember, the parallels are strong. Both are highly opinionated and convention-based full MVC frameworks. Both incorporate a great deal of functionality into a CLI utility. Both are inspired by and derived from Rails. Both include comprehensive routers. Both support clear separation of concerns. Both use discrete templates.
+
+In particular, it is entirely built around the idea of building an Single Page App, or as Ember's webpage calls it, an "ambitious web application". Ember is great at building SPAs. It's a lot less good at other things, though. Not all javascript is an SPA. A lot of the time, complex Javascript is implemented inside an existing app, which is not a good fit for Ember.
+
+The intention here is to build two SPAs with Ember. One simple app to get our feet wet in a basic Ember implementation. One which is a more complicated single page app. This second app connects to an API written in Laravel for persistence and data storage. Building the second app will obviously be quite a lot more challenging, and take up the majority of our time, which is why a simple app will be made first.
+
 
 {mainmatter}

@@ -1,79 +1,3 @@
--# Greg
-
-# Getting started
-
-## Setting up your environment (inc. PHPStorm to use .editorconfig)
-
-## Project layout (2 repositories etc)
-
-## Finding help
-
-# The Ember ecosystem
-
-## Model View Controller vs Model Router Component
-
-## Nomenclature differences
-
-## Responsibilities of each layer
-
-## Router first
-
-## How the URL is the most important part of Ember
-
-## The router state machine
-
-# Building a simple todo application
-
-## Walk through building a basic client side todo application in the traditional “todomvc” style
-
-## Ember data and the API
-
-## Common approaches (JSONAPI vs RESTful adapters)
-
-## HTTP status codes
-
-## Dealing with errors
-
-# Designing an Ember friendly API in laravel
-
-## League/Fractal transformers
-
-## Middleware for serialization (we want to still just be able to return results from the server in the traditional Ember sense - use Middleware to handle serialization)
-
-# Data driven todo application
-
-Refactor the todo application in chapter 5 to deal with persistence
-
-# Query params
-
-So far, endpoints have been simple. Make them queryable while maintaining bookmarkable pages.
-
-# Add a search function to our todo application
-
-# Ember Addons
-
-## Introduction to Ember Addons - adding moment.js to our todo application
-
-## Transition animation
-
-## Introduction to LiquidFire
-
-## Authentication
-
-## Adding JWT to your application using tymondesigns/jwt and ember-simple-auth-token
-
-# Recap
-
-A look at how little code has been used to achieve a fully dynamic todo application
-
-# Ember testing
-
-## Look at the ember testing story, differences between integration and unit testing.
-
-## Refactoring
-
-## Refactor our application to use the pods structure and components
-
 
 -# Matt Pt 1 Making a simple Ember App
 
@@ -169,3 +93,47 @@ Thankfully, Laravel is an exceptional tool to build an API in. It supports JSON 
 ## Implementing CORS
 
 # The rest of the book
+
+
+
+
+# Appendix - Greg's stuff
+
+Getting started
+Setting up your environment (inc. PHPStorm to use .editorconfig)
+Project layout (2 repositories etc)
+Finding help
+The Ember ecosystem
+Model View Controller vs Model Router Component
+Nomenclature differences
+Responsibilities of each layer
+Router first
+How the URL is the most important part of Ember
+The router state machine
+Building a simple todo application
+Walk through building a basic client side todo application in the traditional “todomvc” style
+Ember data and the API
+Common approaches (JSONAPI vs RESTful adapters)
+HTTP status codes
+Dealing with errors
+Designing an Ember friendly API in laravel
+League/Fractal transformers
+Middleware for serialization (we want to still just be able to return results from the server in the traditional Ember sense - use Middleware to handle serialization)
+Data driven todo application
+Refactor the todo application in chapter 5 to deal with persistence
+Query params
+So far, endpoints have been simple. Make them queryable while maintaining bookmarkable pages.
+Add a search function to our todo application
+Ember Addons
+Introduction to Ember Addons - adding moment.js to our todo application
+Transition animation
+Introduction to LiquidFire
+Authentication
+Adding JWT to your application using tymondesigns/jwt and ember-simple-auth-token
+Recap
+A look at how little code has been used to achieve a fully dynamic todo application
+Ember testing
+Look at the ember testing story, differences between integration and unit testing.
+Refactoring
+Refactor our application to use the pods structure and components
+
