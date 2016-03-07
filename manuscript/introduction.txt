@@ -16,5 +16,8 @@ In particular, it is entirely built around the idea of building an Single Page A
 
 The intention here is to build two SPAs with Ember. One simple app to get our feet wet in a basic Ember implementation. One which is a more complicated single page app. This second app connects to an API written in Laravel for persistence and data storage. Building the second app will obviously be quite a lot more challenging, and take up the majority of our time, which is why a simple app will be made first.
 
+## What are we making?
+
+The first app is a basic ToDo app. Making this will let us take a better look at the Ember ecosystem and workflow without worrying too much about the implementation
 
 {mainmatter}
