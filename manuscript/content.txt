@@ -11,7 +11,7 @@ This will just be a simple list of ToDo items, so we can take a clean look at a 
 
 Much of Ember is built around (and by) the Ember CLI - a command-line tool that handles building, asset processing, depenency management, and a whole lot of other things.
 
-The first step is to install this. Doing so requires npm, the Node Package Manager. 
+The first step is to install this. Doing so requires npm, the Node Package Manager. NPM is certain to be installed on almost any environment that a Laravel install is running on, and is definitely installed on any Homestead installation.
 
 ## Creating a new app
 
