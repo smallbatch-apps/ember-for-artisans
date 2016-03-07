@@ -9,6 +9,10 @@ This will just be a simple list of ToDo items, so we can take a clean look at a 
 
 ## Installing the Ember CLI
 
+Much of Ember is built around (and by) the Ember CLI - a command-line tool that handles building, asset processing, depenency management, and a whole lot of other things.
+
+The first step is to install this. Doing so requires npm, the Node Package Manager. 
+
 ## Creating a new app
 
 This is a great place to highlight the simplicity of creating an Ember project, and I think it really needs to be a key chapter.
