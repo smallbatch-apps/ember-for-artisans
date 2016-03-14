@@ -19,11 +19,43 @@ This is a great place to highlight the simplicity of creating an Ember project, 
 
 # Anatomy of an Ember App
 
+The structure of an Ember app is not dissimilar at all to a Laravel equivalent. In both cases the meat of the app is in the /app directory. Both have a /public directory, but in Ember's case that is for assets, which in the Laravel app go into the /resources directory. Ember has a /dist directory, which contains the bundled and working application ready for deployment and distribution. Those files should never be edited, because Ember will overwrite them if you even take a hard glance at the app files.
+
+In both cases there are directories in the app directory that should be the same, or related, such as /app/templates/ and /app/models/. Ember has quite a few different directories, such as routes and adapters that won't have a parallel in Laravel.
+
 ## Similar to Laravel - but differences can be tricky
+
+You can see at this point that we're missing something. There is no controller in this equation at all. If comparing to a Laravel application we'd have a whole bunch of errors at this point. This highlights an important behavior of Ember. Convention is not just enforced, but assumed. Wherever possible, rational and sensible defaults are used, and various bits and pieces of boilerplate can just be completely omitted entirely, with Ember filling in the gap itself.
+
+In this example, the missing piece is a Route. If Ember sees a URL that's being called without a Route file, it will automatically fill in the gap with a route with default behavior - pretty much none. If it doesn't find a template, it will similarly dump in a blank one with just an outlet in it. This sort of of thing happens routinely in Ember. Sensible and logical conventions are facilitated.
+
+Controllers in Ember are not what they seem to a Laravel developer. In Emberland a controller is nothing more than a decorator for model data. For example, if your model has a first name and a last name, and you want to add a "full name" then the controller is a fine place to do that. It doesn't really affect the underlying data, just its display. But that central, binding, all important negotiator between data and view that is held by a Controller in Laravel is NOT done by an Ember Controller. That role is filled by a Route. I stress that this is all just terminology. A route in Ember has almost exactly the same job as a Laravel controller. If it seems like I'm over-emphasising this, there's a reason. When I first started using Ember this was one of the things I struggled with the most. I kept wanting to think the Controller was like a Laravel controller. If this seems "wrong", considering the pattern is called MVC, now is a good time to reconsider that the pattern refers to layers of concern, not the name of the classes. Eloquent models in Laravel are NOT the model. They are a part of the model layer. Various repositories might also be included, just as the Controller layer also includes the router and other thing. Calling the classes controller or model is a mere convention. Obviously a reasonable one. But in Ember, both Controllers and Routes fit neatly within that controller layer. Controllers in Ember are being steadily eroded in favour of services, components, and other solutions. Just bear in mind that an Ember Route is the same job as a Laravel Controller and you'll be fine.
 
 ## ES6/ES2015
 
+ES2015 is a more up-to-date term for what we used to call ES6, an update to JavaScript which allows new functionality such as better scope management and support for classes. ES2015 allows discrete packets of functionality to be split away, and then all built back together later, exactly as we do with Laravel. Lots of small files with very specific jobs. It's not the intention of this book to teach you everything in ES2015, and it's well worth knowing on its own. But there are two main things you need to know to get along with Ember. First of all, ES2015 files import what they need to use, and export themselves as an object based on their filename. Think includes in PHP, for the first part. The second thing is that pretty much no browser fully or properly supports ES2015. It is invariably compiled down (transpiled) to standard JavaScript using a tool called Babel. Ember CLI handles this process, pulling in and converting all the modules, templates, etc. All Ember apps run as standard JavaScript, even though they're written in fancy new JS syntax.
+
 ## Router
+
+The Ember router is recognisably like the Laravel router.
+
+~~~~~~~~
+Router.map(function() {
+  this.route('about', { path: '/about' });
+  this.route('todos', { path: '/todos' });
+});
+~~~~~~~~
+
+Can clearly be compared with Laravel's equivalent:
+
+~~~~~~~~
+Route::get('about', 'HomeController@about');
+Route::get('todos', 'TodoController@list');
+~~~~~~~~
+
+The similarities are clear, and the initial differences of syntax mostly come down to "because it's Javascript", but there are some important differences. The method specified in Laravel makes no sense in Ember routes, where everything is a GET. Obviously the first argument names the route in both cases. After that, Laravel and Ember diverge. Laravel defines a controller, and the method on that controller. Ember doesn't do this. The resolver doesn't need to be told what router class to use - convention enforces it. They **must** be at `routes/about.js` and `routes/todos.js`.
+
+T> The `path` keys on the Ember routes are not strictly necessary. If the path is the same as the route name it can be completely omitted - another example of Ember using sensible default behaviours. That would make it the much cleaner `this.route('about');`. Much cleaner.
 
 ## Routes vs Controllers
 
@@ -39,10 +71,20 @@ A model backs a route, and the default implementation is an Ember Data model. Th
 
 ## Components
 
+## Pods
+
+Which is more appropriate? Grouping all your routes and models together by entity type, like user/route.js, user/model.js? Or grouping like files together, such as routes/user.js and routes/projects.js? The answer, of course, is yes. Either of those is entirely reasonable, and completely arbitrary. Laravel typically uses the latter, grouping like files together, but you can always move things around. Ember made a similar decision initially, and CLI defaults to that. But it also supports the former option, grouping entity files together, a form Ember calls "Pods". While the current default (?) is the same as Laravel's, that will be changing. We will do our ToDo app without using pods, but implement them in the second. It really is a trivial difference, and all the generators work fine. You can mix and match styles, or change it at will.
+
 
 # Ember CLI
 
 Ember CLI is to Ember what Artisan is to Laravel. It contains a lot of helpful command-line tools that maintain consistency, and makes Ember a simpler and more developer friendly environment. Ember CLI has now become a core feature of Ember, and does a lot of stuff like building, live-reload, serving, generation, etc, all of which eat a chain of dicks in other frameworks. Ember CLI also contains a lot of Ember addons by default.
+
+Ember's CLI isn't just a simple wrapper around something like Yeoman for facilitating new projects, but a comprehensive and powerful tool. People familiar with other frameworks (or JavaScript in general) will know how much of a pain it can be working with the tools to get a project actually up. Linting, minifying, uglifying, concatinating, moving files, Sass/less compiling, transcribing ES6, etc, is all done in something like gulp or webpack. This means setting up tools, checking paths, creating directories, installing dependencies, managing add-ons, and so on. It's not a killer, but... It is a bit of a pain.
+
+Where Ember differs is that the CLI handles all of this for you. Ember CLI does a staggering amount of stuff. It creates new Ember applications. It generates boilerplate. It manages add-ons. It runs full build systems, a server, live reloading, debugging, testing, deployment, and more. There is literally zero setup for most apps. No gulp or grunt files. No configuration.
+
+The other thing Ember CLI provides is a range of generation blueprints. These allow boilerplate to be immediately created, while maintaining consistency of code, and of name. It is highly recommended to use these generators instead of creating the files or directories manually. Otherwise you accidentally spell "adapter" wrong and it takes you two frustrating days of debugging to notice. Or so I'm told.
 
 ## Ember Serve
 
@@ -140,4 +182,23 @@ Ember testing
 Look at the ember testing story, differences between integration and unit testing.
 Refactoring
 Refactor our application to use the pods structure and components
+
+
+
+Ember CLI
+
+
+
+
+
+Anatomy of an Ember App
+
+
+
+
+
+ES6/ES2015
+
+
+
 
