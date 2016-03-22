@@ -1,2 +1,7 @@
 introduction.txt
+part_1_intro.txt
+embercli.txt
+anatomy.txt
+fitting_pieces.txt
+building_the_app.txt
 content.txt

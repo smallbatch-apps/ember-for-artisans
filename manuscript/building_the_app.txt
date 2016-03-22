@@ -1,0 +1,37 @@
+# Building a Todo App
+
+We've got a working app already.
+
+## Generating the first route
+
+We're going to start off by making a dopey static route, a fairly typical "about us" type page. We want to do this so we can see how we switch back and forth between routes. This is where we see Ember CLI's generators do their thing. Type `ember generate route about-us --pod` at the command-line to create a new Ember route and its associated template. You'll see Ember CLI generating some stuff and popping up some generic messages about its completion. You'll see at a glance that Ember CLI has generated the files exactly where they need to be. Ember CLI has a ton of generators, it's significantly more fully-featured than Artisan's generators and we'll look into some more of those features shortly. You'll also notice that EmberCLI has updated the router, so that new route is already supported and working.
+
+T> You don't actually have to type `generate`, just typing `ember g` will do the same thing with less tapping. We're just trying to be explicit here.
+
+If we edit the new `apps/templates/about-us.hbs` you'll see that it's pretty much just a blank file. That's fine. Throw a `<h2>About Us</h2>` at the top and we'll get on with our life. You can now see that changed file by going to the `http://localhost:4200/about-us/` URL. Gorgeous. This is built by taking the base path of the index and adding in the about-us content to the output instead of the normal index content.
+
+Now we're going to get wild. See the route file? It should be located at `apps/routes/about-us.js`. Delete that file. Just totally delete it. Don't delete the template, just the route. Now go reload the page. You don't actually need to reload it, by the way. Ember CLI has rebuilt your application and run live-reload to make it live pretty much instantly. But you're going to reload anyway, so go ahead.
+
+The difference without a route should be nothing at all. Ember needs a route class. It's vital. But in this case, there's really nothing for it to do. It's a static page, so it has no actions or model. And if Ember is asked to provide a view it doesn't have a route for it just... Goes ahead and creates one dynamically. This is hugely useful. Code you don't write is code you don't need to maintain. This isn't a first for this, by the way. The application route, the base for Ember, is also similarly magicked into existence. That's why there's an `application.hbs` but no application route.
+
+## Generating a second route
+
+This kind of static content is hardly the point of a JavaScript application, so we're going to get into something a bit more dynamic now and generate a more useful route that starts to work with data a bit.
+
+Type `ember generate resource todos --pod` and you'll get it building a bunch of useful things. Resource should create all the things you need to make it go, with some boilerplate.
+
+A few of these we don't really need, but we'll just ignore them.
+
+The main thing we'll do first is to open our template, which will live at `app/templates/todos.hbs`. Then we'll throw in another `<h2>List of Todos</h2>` at the top just so we can tell that it's all working properly.  Going to the right `http://localhost:4200/todos` will show us
+
+## Making the route more useful
+
+## Linking between routes
+
+## Templates
+
+## Creating
+
+## Deleting
+
+## Checking
