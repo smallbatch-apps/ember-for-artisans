@@ -18,7 +18,9 @@ The first step is to install this. Doing so requires npm, the Node Package Manag
 
 The process of creating a new Ember application is surprisingly simple. One of the best features of Ember is the ability to get a working project with a high degree of functionality up and running extremely quickly. Ember CLI can do this easily.
 
-   ember new todos-demo
+~~~~~~~~
+ember new todos-demo
+~~~~~~~~
 
 Once NPM finishes installing all the stuff, you will have an ember app that works and is editable. All the directories are created and ready to go. If you're playing along at ome you should probably change into the `todos-demo` directory or the rest of this isn't going to work particularly well.
 
@@ -44,8 +46,39 @@ T> If you use PHPStorm, or pretty much any IDE, you should make sure you omit th
 
 ## Installing Addons
 
-The addon ecosystem for Ember is impressive, and contains access to a range of utilities and services. Em
+The addon ecosystem for Ember is impressive, and contains access to a range of utilities and services, a few of which we'll use for this project, and a lot more of which we'll use for the next one.
 
 [Ember Addons](https://www.emberaddons.com/) and [Ember Observer](http://emberobserver.com/) are both excellent resources to find addons for Ember without flailing around on Google and finding irrelevant things.
 
-T> Installing a new addon is one of the few things Ember server can't quite get its pretty little head around. Just kill it (control + c, and yes, even on a Mac) and type `ember server` again and it will come back up.
+We want to get a quick start on layout without putting too much effort in, so first of all, let's install bootstrap. Installing an addon just uses a simple syntax: `ember install name-of-addon`. In this case we want to use the package Ember Bootstrap, so we can just type `ember install ember-bootstrap`. This will handle all the NPM stuff and Bower stuff, and add in any CSS or javascript files that are required by the addon. Just because I know we're going to use it anyway, let's throw some Font Awesome icons in there as well. Enter `ember install ember-cli-font-awesome` and that one will do the same stuff.
+
+
+T> Installing a new addon is one of the few things Ember server can't quite get its pretty little head around. It doesn't have access to the new files that are added while it's running. Just kill it (control + c, and yes, even on a Mac) and type `ember server` again and it will come back up.
+
+To show how easy these addons are to use, we'll just do some more setup to make things look better. Open up `apps/templates/application.hbs` and wrap all of the contents of that in a bootstrap container div. 
+
+~~~~~~~~
+<div class="container">
+// everything that was already here
+</div>
+~~~~~~~~
+
+You'll notice that the bodgy h1 tag has moved closer to the middle now, given at least the pretense of a bootstrap grid. If you're following at home, you're welcome to put as much or little effort into grid and styling as you want. We just want something vaguely servicable here, so there's no need to polish it up too much. Just to make sure the fontawesome plugin is workking, let's modify the h1 tag, and add in a fontawesome icon. In the absence of anything more suitable, there's one called task, so we'll just use that.
+
+With all these changes made, this is the complete code of the application template
+
+~~~~~~~~
+<div class="container">
+
+  <div class="row">
+    <div class="col-md-12">
+      <h2 id="title">{{fa-icon "tasks"}} Things I Have To Do</h2>
+    </div>
+  </div>
+
+  <div class="row">
+  {{outlet}}
+  </div>
+
+</div>
+~~~~~~~~

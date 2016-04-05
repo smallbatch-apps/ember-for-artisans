@@ -76,17 +76,17 @@ Would be done in Ember as
 
 Different, but not totally unfamiliar.
 
-In the same way as Blade uses @yield to embed a sub-template, Ember uses {{outlet}}. Note that these are not specified to a a particular sub-template because they're much more dynamic. Ember figures all that out.
+In the same way as Blade uses @yield to embed a sub-template, Ember uses {{outlet}}. Note that these are not specified to a particular sub-template because they're much more dynamic. Ember figures all that out.
 
 ## Models
 
-A model backs a route, and the default implementation is an Ember Data model. This is OK because the Ember Data model looks pretty similar to a Laravel Eloquent Model. The App does not need to use Ember Data, though. POJOs are fine.
+Most routes will have a model hook that returns data for that route. For the most part, in a real application, this will be an Ember Data model. This is very much like an Eloquent model. Unlike Eloquent, it explicitly defines the fields, but like Eloquent it also defines the relationships between itself and other models. This first application will 
 
 ## Components
 
 A Component in Ember is a reusable self-contained bit of interface. Typically it will be an HTML element, like a form or a button. There really isn't anything comparable to this in Laravel but the principle of them isn't hugely complicated. A component is by nature isolated from the rest of the system. They are embedded directly into a template. Ember components are related to and are intended to mirror Web Components, a HTML standard that is still being implemented. This means they also have to be named according to Web Component standards, specifically with a hyphenated name such as  button-approve or user-row. The goal is that when Web Components become viable, you will be able to simply replace out the Ember Components with them.
 
-The current syntax for Components is as follows
+The current syntax for Components is as follows, if you were to (for example), replace all of the todo list items with an
 
 ~~~~~~~~~
 <ul>
@@ -102,4 +102,6 @@ Ember development is strongly (and increasingly) based around good use of compon
 
 ## Pods
 
-Which is more appropriate? Grouping all your routes and models together by entity type, like user/route.js, user/model.js? Or grouping like files together, such as routes/user.js and routes/projects.js? The answer, of course, is yes. Either of those is entirely reasonable, and completely arbitrary. Laravel typically uses the latter, grouping like files together, but you can always move things around. Ember made a similar decision initially, and CLI defaults to that. But it also supports the former option, grouping entity files together, a form Ember calls "Pods". Ember's generators can be made to use this pod
+Which is more appropriate? Grouping all your routes and models together by entity type, like user/route.js, user/model.js? Or grouping like files together, such as routes/user.js and routes/projects.js? The answer, of course, is yes. Either of those is entirely reasonable, and completely arbitrary. Laravel typically uses the latter, grouping like files together, but you can always move things around. Ember made a similar decision initially, and CLI defaults to that. But it also supports the former option, grouping entity files together, a form Ember calls "Pods". Ember's generators can be made to use this pod structure by appending `--pod` to the generator commands. Pod structures are actually already searched first by the resolver, and at some point in the future they'll almost certainly become the default pattern used by the EmberCLI. 
+
+As a compromise to both ways of working we're going to stick with CLI's default structure for this first ToDo app, and go for a pod structure with the larger and more complex application.

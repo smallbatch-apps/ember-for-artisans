@@ -1,0 +1,365 @@
+
+One of the best features of Ember is Ember CLI. It's a friend, a companion, maybe even a lover. Step one of starting with Ember is to install Ember CLI globally to your system. 
+
+~~~~~~~~
+npm install -g ember-cli
+~~~~~~~~
+
+Ember CLI is a pretty solid comparision to Laravel's artisan command line tool in that it has generators and so on, but it also packs a lot more punch. Basically if there is stuff you don't want to do - dependency management, setting up task runners, installing addons, etc, Ember CLI will take it off your hands. Among these is scaffolding an entire new application.
+
+~~~~~~~~
+ember new todo-list
+~~~~~~~~
+
+This command will create a whole new Ember application, ready to run. If you think it can't be that simple, you're right, of course. You have to change directory into your new , and run `ember server`. 
+
+Now you have a properly served app at `http://localhost:4200`, configured with live reload, a comprehensive asset management system, build chain, ES6 transpiling, and a smug sense of superiority toward people who act like Ember is too hard.
+
+T> You should really install the Chrome addon called Ember Inspector. It does a remarkably good job of debugging Ember apps, showing what all the bits are doing, displaying model data, deprecation warnings, etc. All further discussion in this book assumes you have it installed, because you're clearly a smart person who makes good decisions.
+
+If you go to the URL that `ember server` gave you, you'll see Ember's default install app, an appalling monstrosity that could learn a valuable lesson from Laravel's new app experience. Still, that's only going to look bad for a little while longer. The first step to customising this is to open up the template we're looking at here. If you go to `apps/templates`, you'll see it there - `application.hbs`. A .hbs file is a handlebars template file. Not too dissimilar to Laravel's Blade. That should be familiar, except for the `{{output}}` bit, which is functionally similar to Blade's `@yield`. Change the H1 tag to whatever you like, save, and we'll get on with it. You'll probably notice that Ember rebuilds everything automatically on your file change, and updates the browser accordingly. Wizards.
+
+The core thing to know about Ember is that it's all about the routes. Everything is build around the route you use. Ember transitions between routes using HTML push state - punch anyone who tells you # based urls are a current standard. This simplifies Ember greatly - the current URL is the current state of the app, and can be rebuilt or reloaded or shared without issue. Back and next buttons, sharing and bookmarks all work perfectly fine.
+
+That route-centric nature leads to a core difference between Laravel and Ember. The "route" is so central to Ember that the Route class is the equivalent to a Laravel controller, handling data access and templating. There **are** controllers in Ember, but they're mostly data decorators for the view, and they're largely deprecated now.
+
+## Building our first route
+
+We're going to start off with a really basic route. We want an about-us page, because it's a legal requirement. The process of this is trivially simple.
+
+~~~~~~~~
+ember generate route about-us
+~~~~~~~~
+
+You'll see that run through a few things, generating the files we need. You'll also see if you have a look that the router has been updated to add this new route. The main things are a pair - the template and the route. 
+
+T> You don't actually have to type `generate`, just typing `ember g` will do the same thing with less tapping. We're just trying to be explicit here.
+
+If you edit the new `apps/templates/about-us.hbs` you'll see that it's pretty much just a blank file. That's fine. Throw a `<h2>About Us</h2>` at the top and we'll get on with it. The route file is more interesting. 
+
+Going to that route at `http://localhost/about-us` will show us exactly what we would expect to see.
+
+A look at `apps/routes/about-us.js` shows us some pretty standard Ember ES6 boilerplate. More complex routes can have things like the model, actions and properties set in here, but our route is static HTML, so we don't really need any of that. In fact... delete it. Not the content. The whole file. Seriously, do it. If you take another look at the page, you'll see that nothing's changed. Apparently routes aren't so important after all!
+
+What's happening here is one of the great strengths of Ember. It has a strong philosophy of "Convention over Configuration". A lot of people take that to mean that Ember follows a strict set of rules. But a better way to think of it as mutual trust. If Ember's conventions are followed, it behaves with logical and reasonable defaults. In this case, a route is needed, and in fact it's so much needed that if not found, Ember will build one itself, identical to the default one from the generator. This is a **very good thing**, and it means you can simply remove files that don't do anything.
+
+## A more useful route
+
+Very few routes are going to be that static. If you're using an SPA to build entirely static content you need to have a good long think about what you're doing with your life. We're going to now use the same process to build a second route.
+
+~~~~~~~~
+ember generate route todo
+~~~~~~~~
+
+This route is going to list all the todo items, so it's going to be much less static, and will need actual data, which is a core responsibiility of the Route. This just means adding a model hook to the existing boilerplate for your todo route.
+
+~~~~~~~~~
+// app/todo/route.js
+export default Ember.Route.extend({
+	model(){
+		return [
+			{id: 1, checked: false, text: 'Buy milk'},
+			{id: 2, checked: false, text: 'Buy bread'},
+			{id: 3, checked: false, text: 'Bring back Firefly'},
+			{id: 4, checked: false, text: 'Conquer planet'}
+		];
+	}
+});
+~~~~~~~~~
+
+This data is now part of the route, and accessible in its templates, etc. This is obviously a simplified example. You would rarely hardcode data like this. A more common approach would be to use Ember Data models, which is kind of like the equivalent of an Eloquent model. Most particularly this abstracts away persistence, which we're not goihng to do here so we'll look at it more later.
+
+You'll notice that the router shows the route, and the Route class contains the model data, but nothing at all seems to explicitly state the template. The location and structure of the template is implied by conventions of name and structure of routes. In this case, the `app/routes/todo.js` route **must** be calling an `app/templates/todo.hbs` template. That's the convention. And of course, there we'll find it, so open it up.
+
+Looping over model data is nice and easy. Ember (like Blade or any other template system) has systems for looping over data. 
+
+~~~~~~~~
+<ul>
+{{#each model as |item|}}
+	<li>{{item.text}}</li>
+{{/each}}
+</ul>
+~~~~~~~~
+
+If the `|item|` is throwing you, now would be a great time to point out that just `item` would also work, but this newer syntax has some sort of benefit that is not clearly defined. Greg will fix it!
+
+Simple stuff. If you go back to the browser and put in `http://localhost:4200/todo/` you'll see that it does exactly what it should.
+
+## Adding some links
+
+It's at about this point that the staggering ugliness of what we're working on should really start to sting. We can fix that now, starting as ever with usability issues. No one is ever going to type in your correct route urls, so let's make some actual proper links. Ember has a nice helper for that, the `link-to` helper.
+
+We can provide a number of arguments to this thing, but the basic usage is a single argument to link to a route. If we edit the `apps/templates/application.hbs` file again we can put the following in and have a nice clean set of links for our application.
+
+~~~~~~~~
+<ul>
+    <li>{{#link-to 'index'}}Home{{/link-to}}</li>
+    <li>{{#link-to 'about-us'}}About Us{{/link-to}}</li>
+    <li>{{#link-to 'todo'}}ToDo List{{/link-to}}</li>
+</ul>
+~~~~~~~~
+
+Clicking between these is now handle as a transition inside the app. You'll note that the URL changes, but the interface doesn't really move around, as only the content of the `{{outlet}}` is changing.
+
+## Making it look less awful
+
+If you have functioning eyes you'll probably be moderately unhappy with the current aesthetic. We don't want to put too much effort into layout because it's out of scope of this book, but we want to get a nice clean look. The simplest way to do this is to implement Bootstrap. Bootstrap is available as an Ember Add-on, which is a good way to learn how to use these. The process is simple thanks to EmberCLI: `ember install ember-bootstrap`.
+
+This will handle all the NPM stuff and Bower stuff, and add in any CSS or javascript files that are required by the addon. Just because I know we're going to use it anyway, let's throw some Font Awesome icons in there as well. Enter `ember install ember-cli-font-awesome` and that one will do the same stuff.
+
+
+T> Installing a new addon is one of the few things Ember server can't quite get its pretty little head around. It doesn't have access to the new files that are added while it's running. Just kill it (control + c, and yes, even on a Mac) and type `ember server` again and it will come back up.
+
+To show how easy these addons are to use, we'll just do some more setup to make things look better. Open up `apps/templates/application.hbs` and wrap all of the contents of that in a bootstrap container div. 
+
+~~~~~~~~
+<div class="container">
+// everything that was already here
+</div>
+~~~~~~~~
+
+That's really all there is to it. The page will now have your title in a better font and with Bootstrap and Font Awesome are ready, no gulpfile or build process, and you don't even have to include the CSS or javscript, that's already done for you. How far you take the Bootstrap layout is entirely up to you, but we're going to go with very minimal layout here because otherwise the markup gets  bulky. 
+
+## Show a single item
+
+As well as showing a list, we want to be able to view, and more particularly edit, a single item. The best way to do this is to use nested routes. This means that our Todo route will have a number of options - notably `show`, `edit`, and `new`. Before we get started on that, we need to make sure the parent template, our todo template, is ready. If we open that up (`apps/templates/todo.hbs`) You can see our listing of each todo item. What we need to do is make sure there's an `{{outlet}}` somewhere on this template, or any sub-routes we generate will have nothing to render into. If you don't see one there it's because you replaced it before when adding the foreach loop. If you just pasted the foreach loop above the outlet you should be good to go, but either way, just make sure it's there. Not having an outlet is a common cause of confusion when nesting things.
+
+Generating a nested route is no harder than generating any other. `ember generate route todo/show --path=:id` will get the job done handily. This also sets the path option in the route, which is worth a look at now.
+
+If you open the router file, located at `app/router.js` you'll see a fairly familiar structure. This is appreciably similar in structure to the Laravel router, and obviously has the same goals. All the generator work we've been doing has been also added into here automatically, so we haven't really needed to touch it, but it's good to have a look. The todo route is obviously different to the others, now being a nested route. Inside that the show route has a slightly different syntax as well, with a property object on it containing the path. The `:id` in there is much the same as Laravel's `{id}`, but the first part of it is implied from the parent route, so the whole route is `todo/123` rather than just `123`. That object, and specifically the path part of it, is implied in all routes. You could write our about route as `this.route('about-us', {path: 'about-us'});` if you wanted, but in the case of route paths that exactly match the route name it's implied. It's common for Ember to have these sort of sensible defaults to save typing.
+
+Rather than typing this URL in to check it, we're going to actually link to it. Edit your `app/templates/todo.hbs` file and go to the loop and add some links with the link-to helpers. The third second argument to the link-to helper, which we haven't used yet, is to pass in the object you're transitioning to. We can look look like this.
+
+~~~~~~~~
+<ul>
+{{#each model as |item|}}
+	<li>{{#link-to 'todo.show' todo}}{{todo.text}}{{/link-to}}</li>
+{{/each}}
+</ul>
+~~~~~~~~
+
+We have a template now as part of this generation, and it should be at `app/todo/show.hbs`. All we really need is some basic layout in this and we'll be good to go. Note that the model for a single todo will be a single todo item, rather than the collection.
+
+~~~~~~~~
+<!-- app/todo/show.hbs -->
+<div class="container">
+	<div class="row">
+		<div class="col-md-2">Text:</div>
+		<div class="col-md-10">{{model.text}}</div>
+	</div>
+	<div class="row">
+		<div class="col-md-2">Status:</div>
+		<div class="col-md-10">{{model.checked}}</div>
+	</div>
+</div>
+~~~~~~~~
+
+Now you can go to the application, and click through to the Todo page, then click on any of the individual items to view its details.
+
+This **seems** like it's done now, but if you reload this page you can see that it's actually only part of the way there. When Ember transitions from the Todos route to the show route it's passed in the object to use as the model. That means it doesn't have to run its own model hook. When it runs the route from scratch (like when we reload) it does have to. The fact that we haven't actually made that model hook is causing a bit of a problem there. 
+
+It's important to remember that Ember is Route based. It's vitally important that all the routes work, and work on their own terms. So we'll need to provide a model hook for the todo.show route as well. In this case what we want to do is pretty simple. We **could** just dump in the same JavaScript array as the parent route, search it and return the correct object. But what we really want to do is get that array directly from the parent. Thankfully, Ember provides a nice simple way to do that.
+
+Note that in this case we need to pass the parameters into the model hook. That wasn't necessary in the listing, because it didn't take any parameters.
+
+~~~~~~~~~
+// app/todo/show.js
+export default Ember.Route.extend({
+	model(params){
+		let items = this.modelFor('todo');
+		return items.find(function(item){
+			return params.id === item.id;
+		});
+	}
+});
+~~~~~~~~~ 
+
+T> If you look at the docs for link-to you'll see that it shows the third option as the id, which would make you think you pass in todo.todo_id instead of the whole todo object. Either will work, but they work slightly differently. Passing in the id makes the show route run its own model hook, whereas passing in the object overrides it. In this app it's not noticeably different, but in many larger applications that show route model hook will run an API request. This would make passing in the model significantly faster and cleaner.
+
+## Editing
+
+We're going to start off by editing our existing items. There's a reason for that - it doesn't involve us managing the addition or removal of records, which we'll deal with separately.
+
+What we need is another route, for a new todo item. `ember generate route todo/edit --path=:id/edit`.
+
+If we have another look at our router after doing that we'll notice that the new route is **not** nested inside the show route, even though it might look like it from the URL. The show and edit route are siblings, and the reason for this is that from an interface point of view we want the edit form to replace display, not sit inside it.
+
+We need another model hook, which is the exact same code as the show model hook, so just grab that and paste it into the routes file, which in this case is located at `app/routes/todo/edit.js`. 
+
+T> If you're particularly concerned about duplicate code you could use `modelFor('todo.show')` to reuse that. (???)
+
+The `app/templates/todo/edit.hbs` file should look very much like the following.
+
+~~~~~~~~
+<!-- app/todo/edit.hbs -->
+
+<h3 class="no-top-margin">Update Todo Item</h3>
+
+<div class="form-group">
+    <label for="text">Text</label>
+    {{input value=model.text class="form-control"}}
+</div>
+<div class="form-group">
+    <button class="btn btn-info"{{action "update" model}}>{{fa-icon "cloud-upload"}} Update</button>
+</div>
+~~~~~~~~
+
+Again, we'll update the todo loop to provide a link to this new edit route, as well as add some Bootstrap and Font Awesome magic to the interface. The `{{action "update" model}}` part of this is an action helper, telling Ember to run the update function, and passing in the model.
+
+~~~~~~~~
+<ul class="list-group">
+{{#each model as |item|}}
+    <li class="list-group-item">
+        {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
+        {{#link-to 'todo.edit' item}}{{fa-icon "pencil" class="pull-right edit-link"}}{{/link-to}}
+    </li>
+{{/each}}
+</ul>
+~~~~~~~~
+
+T> Note the simplicity of the implementation of Font Awesome, thanks to the add-on we installed earlier.
+
+If you edit the details, you'll notice that when you hit the "Update" button things go very badly wrong. The error says that there is nothing to handle the "update" action, and this is entirely accurate.
+
+Actions in Ember can be handled on a controller (as mentioned before) but in this case we'll handle it on the route, the edit route, specifically. If you open that file at `app/routes/todo/edit.js` you'll see where we already have the model hook. We need to add an actions object to that route, containing an update function. 
+
+~~~~~~~~
+actions: {
+	update(item){
+		alert('saved');
+	}
+}
+~~~~~~~~
+
+You'll note that parameter, the item parameter. That's being passed through in the action helper above, and contains the model. All of the editing of the object has been done in the model itself by editing it, so in this case there's nothing to actually save. In a real application this would be where those changes were persisted, saving the data back to the API, etc. 
+
+## Creating a new item
+
+The new item is slightly more complex because it affects the collection as well as an entire item, but it's not much more so, and certainly starts off the same.
+
+~~~~~~~~
+ember generate route todo/new
+~~~~~~~~
+
+We can grab the exact same form details, copying the entire of edit.hbs and pasting it into new.hbs, then just changing the word "Update" where it appears to "create". Don't forget to change the action!
+
+Before we forget, we need to add a button to create a new item, and we need to put it into `app/templates/todo.hbs`. Under the list you can just put the following line to get a nicely styled button.
+
+~~~~~~~~
+{{#link-to 'todo.new' class="btn btn-info"}}{{fa-icon "plus-circle"}} Add item{{/link-to}}
+~~~~~~~~
+
+The content of the new route is slightly less obvious than some of the others. Obviously we're going to need an action, but less obviously we're going to also need a model. It wouldn't seem like we do, because we're actually creating a model here, but in fact we need a model backing the new template in order to give the template something to hook into, so that when the form is being edited it's making changes to something. In theory what we need to return from the model hook is a blank Ember Object. In practise, Ember will wrap anything returned from the model hook in its own voodoo, so we literally just need to return an empty javascript object.
+
+We also need an action, and this needs to do just a little more than the edit route. In particular it needs to add the new item to our listing. Conveniently, the listing is actually the model for our parent route, so we can add it on there.
+
+The total of the new.js file will be this:
+
+~~~~~~~~
+import Ember from 'ember';
+
+export default Ember.Route.extend({
+  model(){
+    return {};
+  },
+  actions: {
+    create(model){
+
+      let collection = this.modelFor('todo');
+
+      collection.pushObject({
+          id: collection.length,
+          text: model.text,
+          checked: false
+      });
+    }
+  }
+});
+~~~~~~~~
+
+A lot of that should be easy to follow. The collection of all the different todo items is the model for the todo route, so we grab that. This is an Ember Collection object, so we use the `pushObject` method to add a new item to it. We could just use the standard array push, but pushObject respects all the watchers and magic of Ember, making it immediately just as usable as any other item in our collection. Again, it would be typical to persist this new item back to the server as well, but a step not being taken by our demo application.
+
+## Checking an item
+
+There's only one real requirement left. A todo list that can't check off items is in poor shape. We need to add that functionality. The first step is to figure out whose responsibility this is. It might be initially tempting to assume this is the responsibility of the edit route, but remember, from an interface point of view we really just want to handle this directly in the todos listing view, not go somewhere else to do it. So what we need to do is put an action in the todo route.
+
+This action is surprisingly small. All we really want to do is toggle on and off a particular property on a given item that's passed into the action. To do this we just need to add the action to the todo route that already has the model.
+
+~~~~~~~
+actions: {
+	checkItem(item){
+	  Ember.set(item, 'checked', !Ember.get(item, 'checked'));
+	}
+}
+~~~~~~~
+
+This takes in the item, and then uses `Ember.set` to update a property - checked, in this case. Using Ember.set instead of something like `item.checked = true` allows the change to propagate all through the app, keeping everything properly in sync. If you try and just set the property directly Ember Inspector will spit up warnings at you. The `Ember.get` plays a similar role, returning a safe version of the value of the property on that object, and the ! just causes it to invert.
+
+T> This could actually be written quite a bit more simply as `item.toggleProperty('checked');`, which is a shortcut for a lot of the above. (This doesn't work. Why not???)
+
+The only other thing to do is add a checkbox with the action and a bit of styling on the list item. We'll start by modifying the todo list template again. This is now our complete todo.hbs, including some Bootstrap layout and all the additional buttons and classes.
+
+~~~~~~~
+<!-- app/tempates/todo.hbs -->
+<div class="col-md-12">
+
+    <h2>Current Items</h2>
+
+    <div class="row">
+        <div class="col-md-4">
+            <ul class="list-group">
+            {{#each model as |item|}}
+                <li class="list-group-item {{if item.checked "checked" "unchecked"}}">
+
+                    <span class="check-icon" {{action 'checkItem' item}}>
+                        {{fa-icon (if item.checked "check-square-o" "square-o")}}
+                    </span>
+
+                    {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
+                    {{#link-to 'todo.edit' item}}{{fa-icon "pencil" class="pull-right edit-link"}}{{/link-to}}
+                </li>
+            {{/each}}
+            </ul>
+
+            {{#link-to 'todo.new' class="btn btn-info"}}{{fa-icon "plus-circle"}} Add item{{/link-to}}
+        </div>
+        <div class="col-md-4">
+            {{outlet}}
+        </div>
+    </div>
+
+</div>
+~~~~~~~
+
+The new code is mostly in the span that we've thrown an action on and put an icon inside. A conditional `if` as the second parameter tells it whether to have the icon checked or unchecked. Similar code exists above and tells the class whether to be checked or unchecked so our styling will work.
+
+## Handling CSS 
+
+Styling isn't something we've looked into yet, so now is the time. Open up `app/styles/app.css` and you'll have an empty stylesheet to work with. Adding any styling into there will be immediately built and put into the app.css used by the application. We're going to dump in some css mostly just for look. What exactly it does should be readily apparent.
+
+~~~~~~~~
+.check-icon {
+  display: inline-block;
+  width: 15px;
+}
+
+li.checked {
+  text-decoration: line-through;
+}
+
+li .edit-link {
+  display: none;
+}
+
+li:hover .edit-link {
+  display: inline-block;
+}
+~~~~~~~
+
+Most of it is just polish so that we don't see the edit icons unless we mouseover the list item, and the second rule is to make checked items have a strikethrough effect.
+
+This doesn't just have to be CSS. If you're wanting to use Sass, and you should, it's trivial to set up. Just install `ember install ember-cli-sass` and you can just rename `app/styles/app.css` to `app/styles/app.scss`, or create a new one. 
+
+# Extra Credit
+
+
