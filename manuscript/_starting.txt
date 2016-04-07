@@ -1,4 +1,6 @@
 
+-# A simple application in Ember
+
 # Getting Started With Ember CLI
 
 One of the best features of Ember is Ember CLI. It's a friend, a companion, maybe even a lover. 
