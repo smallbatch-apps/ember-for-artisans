@@ -2,7 +2,7 @@
 
 As far as we're concerned, the job is done for the requirements given at the start. This was never intended to be a fully complete application, and a lot of functionality was always intended to be removed to simplify things. Nevertheless, we can take things a few more steps towards completion, and learn some handy stuff.
 
-## Using Components
+# Using Components
 
 Our routes and templates for todo items are a bit messy. Let's be honest, no one is going to use a todo list like this. They're going to want editing to be in-place. They're not going to ever want to go to the page for an item. And we have todo-related stuff scattered through several routes. It would be nice to be able to move that stuff out and make it all neat. Components allow us to do that, making self-contained elements. Components can be as small as a button, or as large as a whole form.
 
@@ -89,7 +89,7 @@ The code in the create() action is pretty close to what we want.
 
 You'll notice that all of the code in the `routes/todo/new.js` file isn't particularly relevant. That's not a route anyone can or will go to now. You can happily delete it. In fact you can delete that whole directory, as well as the `app/templates/todo/` directory.
 
-## Persisting our data
+# Persisting our data
 
 The main feature missing from this app is persistence, the ability to save the data back to something. So that's the first thing we'll tackle in these bonus lessons. Persisting data is primarily done in Ember using an add on called Ember Data. Ember data looks (and functions) a great deal like Eloquent does in Laravel. That is to say it abstracts the data handling, and provides a way of defining models and the relationships between them, but it is not at all an ORM.
 
