@@ -1,5 +1,11 @@
 
-One of the best features of Ember is Ember CLI. It's a friend, a companion, maybe even a lover. Step one of starting with Ember is to install Ember CLI globally to your system. 
+# Getting Started With Ember CLI
+
+One of the best features of Ember is Ember CLI. It's a friend, a companion, maybe even a lover. 
+
+## Installing Ember and Creating a new Project
+
+Step one of starting with Ember is to install Ember CLI globally to your system. 
 
 ~~~~~~~~
 npm install -g ember-cli
@@ -359,7 +365,4 @@ li:hover .edit-link {
 Most of it is just polish so that we don't see the edit icons unless we mouseover the list item, and the second rule is to make checked items have a strikethrough effect.
 
 This doesn't just have to be CSS. If you're wanting to use Sass, and you should, it's trivial to set up. Just install `ember install ember-cli-sass` and you can just rename `app/styles/app.css` to `app/styles/app.scss`, or create a new one. 
-
-# Extra Credit
-
 
