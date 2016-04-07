@@ -252,8 +252,10 @@ Again, we'll update the todo loop to provide a link to this new edit route, as w
 <ul class="list-group">
 {{#each model as |item|}}
     <li class="list-group-item">
-        {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
-        {{#link-to 'todo.edit' item}}{{fa-icon "pencil" class="pull-right edit-link"}}{{/link-to}}
+    {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
+    {{#link-to 'todo.edit' item}}
+        {{fa-icon "pencil" class="pull-right edit-link"}}
+    {{/link-to}}
     </li>
 {{/each}}
 </ul>
@@ -292,7 +294,9 @@ We can grab the exact same form details, copying the entire of edit.hbs and past
 Before we forget, we need to add a button to create a new item, and we need to put it into `app/templates/todo.hbs`. Under the list you can just put the following line to get a nicely styled button.
 
 ~~~~~~~~
-{{#link-to 'todo.new' class="btn btn-info"}}{{fa-icon "plus-circle"}} Add item{{/link-to}}
+{{#link-to 'todo.new' class="btn btn-info"}}
+    {{fa-icon "plus-circle"}} Add item
+{{/link-to}}
 ~~~~~~~~
 
 The content of the new route is slightly less obvious than some of the others. Obviously we're going to need an action because we need to save it. But less obviously we're going to also need a model. It wouldn't seem like we do, because we're creating a model here, but in fact we need a model backing the new template in order to give the template something to hook into, so that when the form is being edited it's making changes to something. 
@@ -363,21 +367,22 @@ The only other thing to do is add a checkbox with the action and a bit of stylin
 <div class="col-md-4">
 <ul class="list-group">
 {{#each model as |item|}}
-<li class="list-group-item {{if item.checked "checked" "unchecked"}}">
+    <li class="list-group-item 
+        {{if item.checked "checked" "unchecked"}}">
+        <span class="check-icon" {{action 'checkItem' item}}>
+            {{fa-icon (if item.checked "check-square-o" "square-o")}}
+        </span>
 
-    <span class="check-icon" {{action 'checkItem' item}}>
-        {{fa-icon (if item.checked "check-square-o" "square-o")}}
-    </span>
-
-    {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
-    {{#link-to 'todo.edit' item}}
-    	{{fa-icon "pencil" class="pull-right edit-link"}}
-   	{{/link-to}}
-</li>
+        {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
+        {{#link-to 'todo.edit' item}}
+            {{fa-icon "pencil" class="pull-right edit-link"}}
+       	{{/link-to}}
+    </li>
 {{/each}}
 </ul>
 
-    {{#link-to 'todo.new' class="btn btn-info"}}{{fa-icon "plus-circle"}} Add item{{/link-to}}
+    {{#link-to 'todo.new' class="btn btn-info"}}
+    {{fa-icon "plus-circle"}} Add item{{/link-to}}
 </div>
 <div class="col-md-4">
     {{outlet}}
@@ -410,7 +415,7 @@ li .edit-link {
 li:hover .edit-link {
   display: inline-block;
 }
-~~~~~~~
+~~~~~~~~
 
 Most of it is just polish so that we don't see the edit icons unless we mouseover the list item, and the second rule is to make checked items have a strikethrough effect.
 
