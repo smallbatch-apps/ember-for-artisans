@@ -1,4 +1,3 @@
-
 -# A Simple app - Extra Credit
 
 As far as we're concerned, the job is done for the requirements given at the start. This was never intended to be a fully complete application, and a lot of functionality was always intended to be removed to simplify things. Nevertheless, we can take things a few more steps towards completion, and learn some handy stuff.
