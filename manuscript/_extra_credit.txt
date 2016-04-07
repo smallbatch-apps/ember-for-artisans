@@ -9,14 +9,19 @@ Our routes and templates for todo items are a bit messy. Let's be honest, no one
 
 T> For the record, you've actually already used components. The Link-to helper is actually a component for dealing with links, and the Font Awesome add on gives us the `{{fa-icon}}` component. 
 
+## Creating a component
+
 Components **must** be written to a specific naming convention, including a hyphen. So `todo` is not a valid component name, but `todo-item` is. This is to make sure it doesn't conflict with existing HTML elements, and is also consistent with the upcoming Custom Elements spec.
 
 We can go ahead and make a component the expected way: `ember generate component todo-item`.
 
 That will make two main files, both of which are in the `app/components/` directory. They are `todo-item.js` and `todo-item.hbs`. The hbs file obviously is the interface and template, while the js file contains primarily any actions and properties of the component.
 
+## Component templates
 
 Let's start playing around with the template first. We're going to be replacing out the list item that contains the todo, so grab the contents of that and paste it right into our component template at `app/components/todo-item.hbs`. You don't need the actual li tag, just its contents, we'll deal with the li tag later.
+
+## Embedding the component
 
 Using your new component is easy. Insert it with `{{todo-item}}`. There are quite a few more options we want to give it, though, so let's start passing stuff in. For a start, we need the actual item in there, from the model. The component won't have access to it otherwise. Note that the component won't have access to **anything** unless it's actually passed in. So any sort of state or setting or data needs to be passed through, in this case `item=item`.
 
