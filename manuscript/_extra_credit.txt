@@ -6,7 +6,9 @@ As far as we're concerned, the job is done for the requirements given at the sta
 
 Our routes and templates for todo items are a bit messy. Let's be honest, no one is going to use a todo list like this. They're going to want editing to be in-place. They're not going to ever want to go to the page for an item. And we have todo-related stuff scattered through several routes. It would be nice to be able to move that stuff out and make it all neat. Components allow us to do that, making self-contained elements. Components can be as small as a button, or as large as a whole form.
 
-T> For the record, you've actually already used components. The Link-to helper is actually a component for dealing with links, and the Font Awesome add on gives us the `{{fa-icon}}` component. 
+Components are something I struggled to "get" for a long time. The best way to think of them is as a custom HTML element. There is a lot of behaviour in a HTML element such as a text input. It needs to support placeholders, that are grey and vanish if your type something else. They need to support things like max size, rejecting new input, handle options such as pattern. The browser does all this without your help. But they're necessarily generic. Components let you make things that are specific to your application.
+
+T> For the record, you've actually already used components. The Link-to helper is actually a component for dealing with links, and the Font Awesome add-on gives us the `{{fa-icon}}` component. 
 
 Components **must** be written to a specific naming convention, including a hyphen. So `todo` is not a valid component name, but `todo-item` is. This is to make sure it doesn't conflict with existing HTML elements, and is also consistent with the upcoming Custom Elements spec.
 
@@ -14,10 +16,11 @@ We can go ahead and make a component the expected way: `ember generate component
 
 That will make two main files, both of which are in the `app/components/` directory. They are `todo-item.js` and `todo-item.hbs`. The hbs file obviously is the interface and template, while the js file contains primarily any actions and properties of the component.
 
-
 Let's start playing around with the template first. We're going to be replacing out the list item that contains the todo, so grab the contents of that and paste it right into our component template at `app/components/todo-item.hbs`. You don't need the actual li tag, just its contents, we'll deal with the li tag later.
 
 Using your new component is easy. Insert it with `{{todo-item}}`. There are quite a few more options we want to give it, though, so let's start passing stuff in. For a start, we need the actual item in there, from the model. The component won't have access to it otherwise. Note that the component won't have access to **anything** unless it's actually passed in. So any sort of state or setting or data needs to be passed through, in this case `item=item`.
+
+T> Note that this isn't considered best-practice. Just as you wouldn't pass the entire user to a text input, you would pass just the actual name, for good components you should be doing the same. In this case, for example, a todo-item becomes highly specific. It will only work with items, nothing else. I'm ok with this.
 
 Each component is itself an HTML element. By default it will be a div, but that's not what we want. What we actually want each element to be is the `li` that makes up an item, and we can do that using the tagName attribute to set it as an `li`, and we will also set the class to what we actually had for bootstrap to style it. The total component embedding should be this.
 
@@ -45,7 +48,13 @@ Go back into the component's template and we can modify the content to add an if
 {{/if}}
 ~~~~~~~~
 
-Again, that should still **look** about right, because the default view is the show view anyway, not the editing view. If you change the isEditing property manually you'll see that the edit form comes up. What we need to be able to do is change that from clicking the edit icon. Find that thing and edit it. You currently have a link-to wrapping it, but that's not what we want. We just want to put an action on it. There are a couple of ways we can handle this, but we'll do it by putting an action call on the div that wraps the icon. So in that all we need to do is write `{{action "enableEditing"}}` and the icon will now function as an action. We'll need to make that action, and we can do so directly in the component JS. All it needs to do is set `isEditing` to true. While we're there, it makes sense to make a second one that simply does the opposite. We're going to need that sooner rather than later.
+Again, that should still **look** about right, because the default view is the show view anyway, not the editing view. If you change the isEditing property manually in the JavaScript file you'll see that the edit form comes up. What we need to be able to do is change that from clicking the edit icon. Find that thing and edit it. You currently have a link-to wrapping it, but that's not what we want. We just want to put an action on it. There are a couple of ways we can handle this, but we'll do it by putting an action call on the div that wraps the icon. So in that all we need to do is write `{{action "enableEditing"}}` and the icon will now function as an action. 
+
+~~~~~~~~
+<div class="pull-right edit-link" {{action "enableEditing"}}>{{fa-icon "pencil"}}</div>
+~~~~~~~~
+
+We'll need to make that action, and we can do so directly in the component JS. All it needs to do is set `isEditing` to true. While we're there, it makes sense to make a second one that simply does the opposite. We're going to need that sooner rather than later.
 
 ~~~~~~~~
 export default Ember.Component.extend({
@@ -61,7 +70,7 @@ export default Ember.Component.extend({
 });
 ~~~~~~~~
 
-T> It may seem more logical to say `this.isEditing = true;` but Ember need to make sure all of the watchers can watch, and everything stays in sync.
+T> It may seem more logical to say `this.isEditing = true;` but Ember need to make sure all of the watchers can watch, and everything stays in sync. Additionally we could make a generic toggleEditing method that swaps the value back and forth, but being explicit here is a little easier to follow.
 
 Clicking on our edit button should now give us a form, and the addition of a cancel button or X with the disableEditing action will let us return to our default.
 
@@ -73,7 +82,7 @@ ember generate component todo-new
 
 The process again is much the same. Grab chunks of interface and stuff them into the component templates. Grab actions and stuff them into the component object. Add a property to set the scope and we're done.
 
-We'll keep the same `isEditing` term, though it's not the best term. That means we can copy and paste the exact same code for both our property and the actions.
+We'll keep the same `isEditing` term, though it's not the best term in this creation context. It just means we can copy and paste the exact same code for both our property and the actions.
 
 T> If we wanted, we could actually make this whole "isEditing" process a _mixin_, much like a trait in PHP. In fact, that's the exact example used in the documentation. That would allow us to re-use the same code without duplication. This is particularly useful for this sort of functionality, because it's likely to be widely used.
 
@@ -87,17 +96,4 @@ The code in the create() action is pretty close to what we want.
 {{todo-new collection=model}}
 ~~~~~~~~
 
-You'll notice that all of the code in the `routes/todo/new.js` file isn't particularly relevant. That's not a route anyone can or will go to now. You can happily delete it. In fact you can delete that whole directory, as well as the `app/templates/todo/` directory.
-
-## Persisting our data
-
-The main feature missing from this app is persistence, the ability to save the data back to something. So that's the first thing we'll tackle in these bonus lessons. Persisting data is primarily done in Ember using an add on called Ember Data. Ember data looks (and functions) a great deal like Eloquent does in Laravel. That is to say it abstracts the data handling, and provides a way of defining models and the relationships between them, but it is not at all an ORM.
-
-Ember Data is built into Ember CLI, so you don't need to install it to use it. Like everything else in Ember we can generate a model easily. Just run `ember generate model todo`, and the model class will be put into the `app/models/` directory. Open that up and you'll see the basic boilerplate for a model.
-
-By itself that won't do much. We need to define a little bit more structure to make it helpful, and that comes down to essentially replicating the structure we had in our model hook in the todo route. 
-
-~~~~~~~~
-export default DS.Model.extend({
-});
-~~~~~~~~
+You'll notice that all of the code in the `routes/todo/new.js` file isn't particularly relevant. That's not a route anyone can or will go to now. You can happily delete it. In fact you can delete that whole directory, as well as the `app/templates/todo/` 
