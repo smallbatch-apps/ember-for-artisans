@@ -9,9 +9,9 @@ The main feature missing from this app is persistence, the ability to save the d
 
 ## Ember Data Models
 
-Persisting data is primarily done in Ember using an add on called Ember Data. Ember data looks (and functions) a great deal like Eloquent does in Laravel. That is to say it abstracts the data handling, and provides a way of defining models and the relationships between them, but it is not at all an ORM.
+Persisting data is primarily done in Ember using an add-on called Ember Data. Ember Data looks (and functions) a great deal like Eloquent does in Laravel. That is to say it abstracts the data handling, and provides a way of defining models and the relationships between them to make data access more consistent and simpler.
 
-Ember Data is built into Ember CLI, so you don't need to install it to use it. Like everything else in Ember we can generate a model easily. Just run `ember generate model todo`, and the model class will be put into the `app/models/` directory. Open that up and you'll see the basic boilerplate for a model.
+Ember Data is built into Ember CLI, so you don't need to install it to use it. Like everything else in Ember we can generate a model easily. Just run `ember g model todo`, and the model class will be put into the `app/models/` directory. Open that up and you'll see the basic boilerplate for a model.
 
 By itself that won't do much. We need to define a little bit more structure to make it helpful, and that comes down to essentially replicating the structure we had in our model hook in the todo route. 
 
@@ -28,15 +28,15 @@ Ember Data is also where you would handle any relationships between models, such
 
 The namespace here is DS, rather than the more typical Ember. DS stands for "data store", Ember's in-memory collection of models. This is a singleton service, widely available in Ember routes and controllers.
 
-The type here is optional, and often omitted. The object with `defaultValue` is even more often omitted, but sometimes both are handy to make it clear exactly what is intended.
+The type here is optional, and often omitted especially for strings. The object with `defaultValue` is even more often omitted, but sometimes both are handy to make it clear exactly what is intended. In this case we want our tasks to always be false from the start.
 
 ## Adapters
 
 Adapters tell Ember Data what the rules are for reading the model's actual persisted form. Is it a RESTful API? Some sort of SOAP call? A backend-as-a-service like Firebase? An S3 instance?
 
-As much as possible we do **not** care about this, we just want to know that when we call `model.find()` our model will be sent back from the server. All the rules and implementation details live in the adaptor.
+As much as possible we do **not** care about this, we just want to know that when we call `model.find(12)` our model will be sent back from the server. All the rules and implementation details live in the adapter.
 
-Adapters sound hard to set up, but they're not. Common setups - such as Rails Active Record or REST - have standard addons that work right up. In fact, if you set **no** adapter it uses REST by default.
+Adapters sound hard to set up, but they're not. Common standards - such as Rails Active Record or REST - have standard addons that work right up. In fact, if you set **no** adapter it uses something very like REST by default, which is the JSON-API spec.
 
 We don't want to use REST though. We don't want to set up a whole API. No, we want to store this locally. We want to use the localStorage adapter.
 
@@ -48,7 +48,7 @@ We can make an adapter exactly as you would expect by now. You just need to spec
 ember generate adapter todo
 ~~~~~~~~
 
-T> You can actually create an adapter called "application", which will then be all models unless overriden by a specific one. We could have used application here, but wanted it to be more clear what exactly the model and adaptor doing.
+T> You can actually create an adapter called "application", which will then be all models unless overriden by a specific one. We could have used application here, but wanted it to be more clear what exactly the model and adaptor are doing.
 
 Now all we need to do is install the LocalStorage adapter.
 
@@ -88,7 +88,7 @@ Using Ember Data models in a route is super easy. All we have to do is replace o
 
 ~~~~~~~~
 model() {
-	return this.store.findAll('todo');
+	return this.get('store').findAll('todo');
 }
 ~~~~~~~~
 
@@ -119,7 +119,6 @@ This new model is created and added to the store, but it's not saved to anything
 actions: {
 	create(model){
 		this.store.pushObject(model);
-		
 		model.save();
 	}
 }
@@ -153,12 +152,6 @@ actions: {
 	}
 }
 
-
-
-
-
-
-
 # Using Components
 
 Our routes and templates for todo items are a bit messy. Let's be honest, no one is going to use a todo list like this. They're going to want editing to be in-place. They're not going to ever want to go to the page for an item. And we have todo-related stuff scattered through several routes. It would be nice to be able to move that stuff out and make it all neat. Components allow us to do that, making self-contained elements. Components can be as small as a button, or as large as a whole form.
@@ -171,7 +164,7 @@ T> For the record, you've actually already used components. The Link-to helper i
 
 Components **must** be written to a specific naming convention, including a hyphen. So `todo` is not a valid component name, but `todo-item` is. This is to make sure it doesn't conflict with existing HTML elements, and is also consistent with the upcoming Custom Elements spec.
 
-We can go ahead and make a component the expected way: `ember generate component todo-item`.
+We can go ahead and make a component the expected way: `ember g component todo-item`.
 
 That will make two main files. It will create the `app/components/todo-item.js` and `app/templates/components/todo-item.hbs`. The hbs file is obviously the template, while the js file contains primarily any actions and properties of the component.
 
@@ -262,3 +255,4 @@ Your component can get hold of the store to actually do things with it by using 
 
 You'll notice that all of the code in the `routes/todo/new.js` file isn't particularly relevant. That's not a route anyone can or will go to now. You can happily delete it. In fact you can delete that whole directory, as well as the `app/templates/todo/` 
 W> This isn't exactly best practise. A component shouldn't really have access to the store. What we should be doing is running actions on a controller
+
