@@ -4,17 +4,21 @@
 
 This book is intended for Laravel developers looking to build complex and intuitive front-end applications, specifically Single Page Apps.
 
-It isn't intended to teach Laravel, though it does touch on a lot of subjects related to creating and optimising an API built in Laravel. As such it assumes a basic familiarity with the Laravel framework. It uses this familiarity to compare and contrast related Ember functionality.
+This initial book does not go into any detail on Laravel itself. It assumes a basic familiarity with the Laravel framework, which it uses to compare and contrast related Ember functionality. Architecturally and in its approach, Ember differs quite a lot from typical JavaScript frameworks. However, in the same way it's very much more like backend frameworks such as Laravel.
 
 ## Why Ember?
 
-The first thing to talk about is the obvious one. Why Ember? Why use Ember instead of the other frameworks around, such as VueJS, Angular, or React? Criticising those frameworks is pointless, everyone has things they do and don't like about them, and one person's con can be an person's pro. What is a more objective statement is that Ember is (by a considerable amount) the most comprehensive and "frameworky" of all Javascript frameworks.
+The first thing to talk about is the obvious one. Why Ember? Why use Ember instead of the other frameworks around, such as VueJS, Angular, or React? Everyone has things they do and don't like about them, and one person's con can be an person's pro. The reason that I like Ember is that I find it an excellent way to be extremely productive very quickly. To my mind, this is what a framework is for.
 
-I've seen nearly everything referred to as the most "Laravel-like" JS framework, but it's hard to know how they mean that or what the actual similarities are. But with Ember, the parallels are strong. Both are highly opinionated and convention-based full MVC frameworks. Both incorporate a great deal of functionality into a CLI utility. Both are inspired by and derived from Rails. Both include comprehensive routers. Both support clear separation of concerns. Both use discrete templates.
+I've seen a number of things referred to as the most "Laravel-like" JS framework, but it's hard to quantify that. With Ember, the parallels are strong. Both are highly opinionated MVC frameworks. Both include a comprehensive range of integrated features. Both incorporate a lot of functionality into a CLI utility. Both are inspired by and derived from Rails. Both include comprehensive routers. Both support clear separation of concerns. Both use discrete templates. They have similar attitudes to rational defaults, to convention over configuration, to testing, and to eliminating unnecessary code. 
 
-In particular, it is entirely built around the idea of building an Single Page App, or as Ember's webpage calls it, an "ambitious web application". Ember is great at building SPAs. It's a lot less good at other things, though. Not all javascript is an SPA. A lot of the time, complex Javascript is implemented inside an existing app, which is not a good fit for Ember.
+Ember is entirely built around the paradigm of the Single Page App. As Ember's webpage calls it, an "ambitious web application". Ambitious as used here doesn't refer to being the next Facebook. A single page app has to handle a lot of different requirements, such as routing, state management, http access, authentication, templating, acceptance testing, string formatting, and so on. All of this is built into Ember. Ember is great at building SPAs. 
 
-The intention here is to build two SPAs with Ember. One simple app to get our feet wet in a basic Ember implementation. One which is a more complicated single page app. This second app connects to an API written in Laravel for persistence and data storage. Building the second app will obviously be quite a lot more challenging, and take up the majority of our time, which is why a simple app will be made first.
+It's a lot less good at other things, though. Not all javascript is an SPA. A lot of the time, complex Javascript is implemented inside an existing app, which is not a good fit for Ember.
+
+The long term intention here is to build two SPAs with Ember. The first one, and the one covered by this book, is a  simple app to get our feet wet in a basic Ember implementation. 
+
+The second one is to be a more complicated single page app. This second app connects to an API written in Laravel for persistence and data storage. Building the second app will obviously be quite a lot more challenging, and take up the majority of our time, which is why a simple app will be made first to cover a lot of the getting started process.
 
 ## What are we making?
 
