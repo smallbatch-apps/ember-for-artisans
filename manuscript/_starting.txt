@@ -165,9 +165,9 @@ To show how easy these addons are to use, we'll just do some more setup to make 
 </div>
 ~~~~~~~~
 
-That's really all there is to it. The page will now have your title in a better font and with Bootstrap and Font Awesome are ready, no gulpfile or build process, and you don't even have to include the CSS or javscript, that's already done for you. How far you take the Bootstrap layout is entirely up to you, but we're going to go with very minimal layout here because otherwise the markup gets bulky.
+That's really all there is to it. The page will now have your title in a better font and with Bootstrap and Font Awesome ready to go, no gulpfile or build process, and you don't even have to include the CSS or javscript, that's already done for you. How far you take the Bootstrap layout is entirely up to you, but we're going to go with very minimal layout here because otherwise the markup gets bulky.
 
-One thing we will do is fix the nav. Bootstrap boilerplate first to replace all our simple, semantic code.
+One thing we will do is "fix" the nav with large slabs of Bootstrap boilerplate first to replace all our simple, semantic code.
 
 ~~~~~~~~
 <nav class="navbar navbar-default">
@@ -179,7 +179,7 @@ One thing we will do is fix the nav. Bootstrap boilerplate first to replace all 
 </nav>
 ~~~~~~~~
 
-Now it looks like a real Bootstrap nav. With one exception. If you click around, you'll notice that the link changes slightly, but not like a full active link in Bootstrap should be. There's a reason for this - Ember is adding a class to the currently active link, `class="active"`. But Bootstrap expects that code on the `li`, not the `a` tag. There are a bunch of solutions to this, most of which are kind of hacky. The cleanest and easiest is another addon. `ember install ember-cli-active-link-wrapper`.
+Now it looks and functions like a real Bootstrap nav. With one exception. If you click around, you'll notice that the link changes slightly, but not like a full active link in Bootstrap should be. There's a reason for this - Ember is adding a class to the currently active link, `class="active"`. But Bootstrap expects that code on the `li`, not the `a` tag. There are a bunch of solutions to this, most of which are kind of hacky. The cleanest and easiest is another addon. `ember install ember-cli-active-link-wrapper`.
 
 Installing this lets you replace the `li`, **not the link-to** with an active-aware version.
 
@@ -205,23 +205,25 @@ If you open the router file, located at `app/router.js` you'll see a fairly fami
 
 All the generator work we've been doing has been also added into here automatically, so we haven't really needed to touch it, but it's good to have a look. The todo route is obviously different to the others, now being a nested route. Inside that the show route has a slightly different syntax as well, with a property object on it containing the path. The `:id` in there is much the same as Laravel's `{id}`, but the first part of it is implied from the parent route, so the whole route is `todo/123` rather than just `123`. That object, and specifically the path part of it, is implied in all routes. You could write our about route as `this.route('about-us', {path: 'about-us'});` if you wanted, but in the case of route paths that exactly match the route name it's implied. It's common for Ember to have these sensible defaults to make things more easy to read.
 
-Rather than typing this URL in to check it, we're going to link to it properly. Edit your `app/templates/todo.hbs` file and go to the loop and add some links with the link-to helpers. The third second argument to the link-to helper, which we haven't used yet, is to pass in the object you're transitioning to. We can look look like this. I'll add some Bootstrap markup at the same time.
 ## More advanced link-to
 
-Rather than typing this URL in to check it, we're going to actually link to it. Edit your `app/templates/todo.hbs` file and go to the loop and add some links with the link-to helpers. The third second argument to the link-to helper, which we haven't used yet, is to pass in the object you're transitioning to. We can look look like this.
+Rather than typing this URL in to check it, we're going to link to it properly. Edit your `app/templates/todo.hbs` file and go to the loop and add some links with the link-to helpers. The second argument to the link-to helper, which we haven't used yet, is to pass in the object you're transitioning to. We can look look like this. I'll add some Bootstrap markup at the same time.
 
 ~~~~~~~~
 <ul class="list-group">
 {{#each model as |item|}}
-	<li class="list-group-item">{{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}</li>
+	<li class="list-group-item">
+        {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
+    </li>
 {{/each}}
 </ul>
 ~~~~~~~~
 
 We have a template now as part of this generation, and it should be at `app/todo/show.hbs`. All we really need is some basic layout in this and we'll be good to go. Note that the model for a single todo will be a todo item, rather than the collection we used in the parent route.
+
 ## The template for a single item
 
-We have a template now as part of this generation, and it should be at `app/todo/show.hbs`. All we really need is some basic layout in this and we'll be good to go. Note that the model for a single todo will be a single todo item, rather than the collection.
+We have a template now as part of this generation, and it should be at `app/todo/show.hbs`. All we really need is some basic layout in this and we'll be good to go. Note that the model for a single todo will be a todo item, rather than the collection we used in the parent route.
 
 ~~~~~~~~
 <!-- app/todo/show.hbs -->
@@ -279,7 +281,7 @@ If we have another look at our router after doing that we'll notice that the new
 
 This is a key for Ember that took me a while to really **get**. You should be thinking of all of this as the structure required for your interface - not the structure you require for your data. If the interface is nested, nest the routes. If they're not... don't. The relationship between data types, etc, is irrelevant. It's the relationship between the interface elements that really matters.
 
-In any case, the `edit` route needs another model hook, which is the exact same code as the `show` model hook, so just grab that and paste it into the routes file, which in this case is located at `app/routes/todo/edit.js`. 
+The `edit` route needs another model hook, which is the exact same code as the `show` model hook, so just grab that and paste it into the routes file, which in this case is located at `app/routes/todo/edit.js`. 
 
 ## The Input Helper
 
@@ -287,7 +289,6 @@ Much like links, inputs are an important part of an Ember app, as they are where
 
 ~~~~~~~~
 <!-- app/todo/edit.hbs -->
-
 <h3 class="no-top-margin">Update Todo Item</h3>
 
 <div class="form-group">
@@ -330,12 +331,11 @@ actions: {
 }
 ~~~~~~~~
 
-You'll note that parameter, the item parameter. That's being passed through in the action helper above, and contains the model. All of the modification of the object has been done in the model itself by editing it, so in this case there's nothing to actually save. In a real application this would be where those changes were persisted, saving the data back to the API, etc. 
-You'll hopefully have noticed that parameter, the item parameter. That's being passed through in the action helper above, and contains the model for this route. It's not something we need to create or pass in manually, it's just automatically populated with whatever is the model for the given route. All of the editing of the object has been done in the model itself by editing it, so in this case there's nothing to actually save. In a real application this would be where those changes were persisted, saving the data back to the API, etc. 
+You'll hopefully have noticed that parameter, the item parameter. That's being passed through in the action helper above, and contains the model for this route. All of the editing of the object has been done in the model  by editing it, so in this case there's nothing to actually save. The model has already changed. In a real application this would be where those changes were persisted, saving the data back to the API, etc. 
 
 # Creating a new item
 
-The new item is slightly more complex because it affects the collection as well as an entire item, but it's not much more so, and certainly starts off the same.
+The new item is slightly more complex because it affects the collection as well as an entire item. It's not much more so, and certainly starts off the same.
 
 ## As always - generate another route
 
@@ -343,7 +343,7 @@ The new item is slightly more complex because it affects the collection as well 
 ember generate route todo/new
 ~~~~~~~~
 
-We can grab the exact same form details, copying the entire of edit.hbs and pasting it into new.hbs, then just changing the word "Update" where it appears to "create". Don't forget to change the action!
+We can grab the exact same form details, copying the entire of `edit.hbs` and pasting it into `new.hbs`, then just changing the word "Update" where it appears to "Create". Don't forget to change the action!
 
 Before we forget, we need to add a button to create a new item, and we need to put it into `app/templates/todo.hbs`. Under the list you can just put the following line to get a nicely styled button.
 
@@ -353,7 +353,7 @@ Before we forget, we need to add a button to create a new item, and we need to p
 {{/link-to}}
 ~~~~~~~~
 
-The content of the new route is slightly less obvious than some of the others. Obviously we're going to need an action because we need to save it. But less obviously we're going to also need a model. It wouldn't seem like we do, because we're creating a model here, but in fact we need a model backing the new template in order to give the template something to hook into, so that when the form is being edited it's making changes to something. 
+The content of the new route is slightly less obvious than some of the others. Obviously we're going to need an action because we need to save it. But less obviously we're going to also need a model. It wouldn't seem like we do, because we're creating a model here. But creating a model up front gives us something to edit. In fact we need a model backing the new template in order to give the template something to hook into, so that when the form is being edited it's making changes to something. 
 
 In theory what we need to return from the model hook is a blank Ember Object. In practise, Ember will wrap anything returned from the model hook in its own voodoo, so we literally just need to return an empty javascript object.
 
@@ -383,8 +383,7 @@ export default Ember.Route.extend({
 });
 ~~~~~~~~
 
-A lot of that should be easy to follow. The collection of all the different todo items is the model for the todo route, so we grab that. This is an Ember Collection object, so we use the `pushObject` method to add a new item to it. We could just use the standard array push, but pushObject respects all the watchers and magic of Ember, making it immediately just as usable as any other item in our collection. Again, it would be typical to persist this new item back to the server as well, but a step not being taken by our demo application. It's worth pointing out that the process of doing that would be literally something like `newItem.save();`, though we'd need to make that object as a separate variable rather than right there in the pushObject.
-A lot of that should be easy to follow. The model as we said before is just an empty object so that our forms have a model backing them. Then there's an actions object, containing a single create function, which is passed the previously mentioned now-not-so-empty model. Inside that is where newer things are happening.
+This is probably the most JavaScript we've seen so far in one go. But it should still be easy to follow. A lot of that should be easy to follow. The model as we said before is just an empty object so that our forms have a model backing them. Then there's an actions object, containing a single create function, which is passed the previously mentioned now-not-so-empty model. Inside that is where newer things are happening.
 
 The collection of all the different todo items is the model for the todo route, so we grab that. It's simply the easiest thing to do, and to be honest it most clearly reflects the intent here. This is an Ember Collection object, so we use the `pushObject` method to add a new item to it. We could just use the standard array push, but pushObject respects all the watchers and magic of Ember, making it immediately just as usable as any other item in our collection. Again, it would be typical to persist this new item back to the server as well, but a step not being taken by our demo application.
 
@@ -394,7 +393,7 @@ There's only one real requirement left. A todo list that can't check off items i
 
 ## A simple action
 
-This action is surprisingly small. All we really want to do is toggle on and off a particular property on a given item that's passed into the action. To do this we just need to add the action object and this action function to the todo route that already has the model.
+This action is surprisingly small. All we really want to do is toggle on and off a particular property on a given item that's passed into the action. To do this we just need to add the action object with this function to the todo route that already has the model.
 
 ~~~~~~~
 actions: {
@@ -404,9 +403,9 @@ actions: {
 }
 ~~~~~~~
 
-This takes in the item, and then uses `Ember.set` to update a property - checked, in this case. Using Ember.set instead of something like `item.checked = true` allows the change to propagate all through the app, keeping everything properly in sync. If you try and just set the property directly Ember Inspector will spit up warnings at you. The `Ember.get` plays a similar role, returning a safe version of the value of the property on that object, and the ! just causes it to invert.
+This takes in the item, and then uses `Ember.set` to update a property - checked, in this case. Using Ember.set instead of something like `item.checked = true` allows the change to propagate all through the app, keeping everything properly in sync. If you try and just set the property directly Ember Inspector will spit up warnings at you. The `Ember.get` plays a similar role, returning a safe version of the value of the property on that object, and the ! just causes it to invert. Again, this would be the point where we would be saving back to an API.
 
-T> This could actually be written quite a bit more simply as `item.toggleProperty('checked');`, which is a shortcut for a lot of the above. (This doesn't work. Why not???)
+T> This could actually be written quite a bit more simply as `item.toggleProperty('checked');`, which is a shortcut for a lot of the above.
 
 ## Connecting up the action in the template
 
@@ -414,8 +413,6 @@ The only other thing to do is add a checkbox with the action and a bit of stylin
 
 ~~~~~~~
 <!-- app/tempates/todo.hbs -->
-<div class="col-md-12">
-
 <h2>Current Items</h2>
 
 <div class="row">
@@ -435,15 +432,13 @@ The only other thing to do is add a checkbox with the action and a bit of stylin
     </li>
 {{/each}}
 </ul>
-
     {{#link-to 'todo.new' class="btn btn-info"}}
-    {{fa-icon "plus-circle"}} Add item{{/link-to}}
+        {{fa-icon "plus-circle"}} Add item
+    {{/link-to}}
 </div>
 <div class="col-md-4">
     {{outlet}}
 </div>
-</div>
-
 </div>
 ~~~~~~~
 
