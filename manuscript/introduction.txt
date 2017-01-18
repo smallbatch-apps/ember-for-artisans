@@ -2,7 +2,7 @@
 
 # Introduction
 
-This book is intended for Laravel developers looking to build complex and intuitive front-end applications, specifically Single Page Apps.
+This book is intended for Laravel developers looking to build complex and intuitive front-end applications, specifically Single Page Apps, often abbreviated to SPA.
 
 It isn't intended to teach Laravel, though it does touch on a lot of subjects related to creating and optimising an API built in Laravel. As such it assumes a basic familiarity with the Laravel framework. It uses this familiarity to compare and contrast related Ember functionality.
 

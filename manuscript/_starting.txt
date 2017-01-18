@@ -19,7 +19,7 @@ Ember CLI is a pretty solid comparision to Laravel's artisan command line tool i
 ember new todo-list
 ~~~~~~~~
 
-This command will create a whole new Ember application, ready to run. If you think it can't be that simple, you're right, of course. You have to change directory into your new , and run `ember server`. 
+This command will create a whole new Ember application, ready to run. If you think it can't be that simple, you're right, of course. You have to change directory into your new app's working directory, and run `ember server`. 
 
 Now you have a properly served app at `http://localhost:4200`, configured with live reload, a comprehensive asset management system, build chain, ES6 transpiling, and a smug sense of superiority toward people who act like Ember is too hard.
 
@@ -31,7 +31,7 @@ If you go to the URL that `ember server` gave you, you'll see Ember's default in
 ember generate template application. 
 ~~~~~~~~
 
-That file will be generated instantly, building nearly as quickly. It will also stop the application working, and make it a white screen. Ignore that. We've replaced the base template with an empty file, and we'll fix that now. If you go to `apps/templates`, you'll see it there now - `application.hbs`. A .hbs file is a handlebars template file. Not too dissimilar to Laravel's Blade. Much like blade, an empty root template with no sections or yields results in a screen that redefines "minimalism". What it needs is an `{{output}}` , so just type that in and save it. This is functionally similar to Blade's `@yield`. Add a H1 tag, and whatever markup you like, save, and we'll get on with it. You'll probably notice that Ember rebuilds everything automatically on your file change, and updates the browser accordingly. Wizards.
+That file will be generated instantly, building nearly as quickly. It will also stop the application working, and make it a white screen. Ignore that. We've replaced the base template with an empty file, and we'll fix that now. If you go to `apps/templates`, you'll see it there now - `application.hbs`. A .hbs file is a handlebars template file. Not too dissimilar to Laravel's Blade. Much like blade, an empty root template with no sections or yields results in a screen that redefines "minimalism". What it needs is an `{{outlet}}` , so just type that in and save it. This is functionally similar to Blade's `@yield`. Add a H1 tag at the top, and whatever markup you like, save, and we'll get on with it. You'll probably notice that Ember rebuilds everything automatically on your file change, and updates the browser accordingly. Wizards.
 
 # Routes in Ember
 
@@ -134,6 +134,20 @@ Clicking between these is now handle as a transition inside the app. You'll note
 
 The outlet in Ember is very much like Laravel's `@yield` functionality, pulling in a sub-template. Unlike Laravel, which only needs to build the structure up once, Ember outlets are highly dynamic, invariably having their contents changed. Any template that is rendering a sub-template needs to have an outlet there to take that. For now all of our routes are a flat structure. The only place they can or should render into is that one outlet. That will change soon.
 
+# Testing in Ember
+
+## How to run your tests
+
+The simplest way to run your tests is to go to `http://localhost:4200/tests`. This will show a page with all of your tests on it. There are two possibilities at this point. If you've been largely ignoring me, and doing things at your own pace or however you want, everything will be fine, all tests green. If you actually listened and were obedient and well-behaved you now have at least one major error you need to fix. There's a life lesson in there.
+
+The error is pretty simple. When we generated the routes earlier, EmberCLI also generated test stubs along with them. The tests are pretty trivial, they just tests that the JavaScript is valid and present. However, if you recall from earlier, we actually deleted the `about-us` route. It's no longer present. We can get rid of that error by simply deleting the `tests/unit/routes/about-us.js` file. There's no point testing code that doesn't exist. With that file gone, it should just test green.
+
+This is the easiest way to test, but it's not the best. The best is to use EmberCLI. We can run the tests by simply running the command `ember test`. There's a fair chance that will get an error, too. It will say something along the lines of "Unable to find PhantomJS". Phantom is a "headless browser". It lets JavaScript execute in a command line, with no interface or display, and shows the results of the page tests, all run in memory. It's not exactly a default install. On a Mac at least it's easy to set up. `brew install phantomjs`
+
+With that in place, `ember test` should happily display successful output.
+
+## How to write tests
+
 # Making it look less awful
 
 If you have functioning eyes you'll probably be moderately unhappy with the current aesthetic. We don't want to put too much effort into layout because it's out of scope of this book, but we want to get a nice clean look. 
@@ -178,7 +192,6 @@ Installing this lets you replace the `li`, **not the link-to** with an active-aw
 
 Click around and the problem is fixed. Nice and simple.
 
-
 # Nested Routes
 
 ## How to show a single item
@@ -194,6 +207,7 @@ If you open the router file, located at `app/router.js` you'll see a fairly fami
 All the generator work we've been doing has been also added into here automatically, so we haven't really needed to touch it, but it's good to have a look. The todo route is obviously different to the others, now being a nested route. Inside that the show route has a slightly different syntax as well, with a property object on it containing the path. The `:id` in there is much the same as Laravel's `{id}`, but the first part of it is implied from the parent route, so the whole route is `todo/123` rather than just `123`. That object, and specifically the path part of it, is implied in all routes. You could write our about route as `this.route('about-us', {path: 'about-us'});` if you wanted, but in the case of route paths that exactly match the route name it's implied. It's common for Ember to have these sensible defaults to make things more easy to read.
 
 Rather than typing this URL in to check it, we're going to link to it properly. Edit your `app/templates/todo.hbs` file and go to the loop and add some links with the link-to helpers. The third second argument to the link-to helper, which we haven't used yet, is to pass in the object you're transitioning to. We can look look like this. I'll add some Bootstrap markup at the same time.
+
 ## More advanced link-to
 
 Rather than typing this URL in to check it, we're going to actually link to it. Edit your `app/templates/todo.hbs` file and go to the loop and add some links with the link-to helpers. The third second argument to the link-to helper, which we haven't used yet, is to pass in the object you're transitioning to. We can look look like this.
