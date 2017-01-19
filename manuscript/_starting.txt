@@ -35,7 +35,7 @@ ember generate template application
 
 Now would be a pretty good time to make sure whatever editor you use is set up with the new project, or to open the directory, or whatever. Note that while editors often have functionality to make and manage files we shouldn't be needing those. That said, if you have an editor or IDE that has a command line feel free to use that. PHPStorm, Webstorm and Visual Studio Code all definitely do.
 
-That file will be generated instantly, building nearly as quickly. It will also stop the application working, and make it a white screen. Ignore that. We've replaced the base template with an empty file, and we'll fix that now. If you go to `apps/templates` in your editor, you'll see it there now - `application.hbs`. A .hbs file is a handlebars template file. Not too dissimilar to Laravel's Blade. Much like blade, an empty root template with no sections or yields results in a screen that redefines "minimalism". What it needs is an `{{output}}` , so just type that in and save it. This is functionally similar to Blade's `@yield`. Add a H1 tag, and whatever markup you like, save, and we'll get on with it. You'll probably notice that Ember rebuilds everything automatically on your file change, and updates the browser accordingly. Wizards. If you can still see your `ember server` tab you will be able to see what it's building, too. That build process even gives you a heads-up about Javascript standards errors, which can often be very useful.
+That file will be generated instantly, building nearly as quickly. It will also stop the application working, and make it a white screen. Ignore that. We've replaced the base template with an empty file, and we'll fix that now. If you go to `apps/templates` in your editor, you'll see it there now - `application.hbs`. A .hbs file is a handlebars template file. Not too dissimilar to Laravel's Blade. Much like blade, an empty root template with no sections or yields results in a screen that redefines "minimalism". What it needs is an `{{outlet}}` , so just type that in and save it. This is functionally similar to Blade's `@yield`. Add a H1 tag, and whatever markup you like, save, and we'll get on with it. You'll probably notice that Ember rebuilds everything automatically on your file change, and updates the browser accordingly. Wizards. If you can still see your `ember server` tab you will be able to see what it's building, too. That build process even gives you a heads-up about Javascript standards errors, which can often be very useful.
 
 # Routes in Ember
 
@@ -90,6 +90,8 @@ export default Ember.Route.extend({
 	}
 });
 ~~~~~~~~~
+
+W> Note that the code used in Ember objects always starts with a line of `import Ember from 'ember';`. We're not showing that in these examples, but it will be part of the code generated. It is not shown in these examples **purely to save space** and is definitely required for the code to function.
 
 This data is now part of the route, and accessible in its templates, etc. This is obviously a simplified example. You would rarely hardcode data like this. A more common approach would be to use Ember Data models, which is kind of like the equivalent of an Eloquent model, forming an ORM for API access. Most particularly this abstracts away persistence, which we're not goihng to do here so we'll look at it more later.
 
@@ -158,6 +160,8 @@ This is the easiest way to test, but it's not the best. The best is to use Ember
 With that in place, `ember test` should happily display successful output.
 
 ## How to write tests
+
+For the most part, Ember will generate the tests for you, or at least a test stub. This is a good starting point and saves you from having to do too much work. You also get the benefit that the intial tests in the stub are jslint tests, so if you violate any important JavaScript style rules it will get picked up.
 
 # Making it look less awful
 
@@ -339,11 +343,20 @@ If you edit the details, you'll notice that as you change the details in the fie
 Actions in Ember can be handled on a controller (as mentioned before) but in this case we'll handle it on the route, the edit route, specifically. If you open that file at `app/routes/todo/edit.js` you'll see where we already have the model hook. We need to add an actions object to that route, containing an update function. 
 
 ~~~~~~~~
-actions: {
-	update(item){
-		alert('saved');
-	}
-}
+//app/routes/todo/edit.js
+export default Ember.Route.extend({
+	model(params){
+		let items = this.modelFor('todo');
+		return items.find(function(item){
+			return +params.id === item.id;
+		});
+	},
+    actions: {
+        update(item){
+            alert('saved');
+        }
+    }
+});
 ~~~~~~~~
 
 You'll hopefully have noticed that parameter, the item parameter. That's being passed through in the action helper above, and contains the model for this route. All of the editing of the object has been done in the model  by editing it, so in this case there's nothing to actually save. The model has already changed. In a real application this would be where those changes were persisted, saving the data back to the API, etc. 
@@ -358,7 +371,7 @@ The new item is slightly more complex because it affects the collection as well 
 ember generate route todo/new
 ~~~~~~~~
 
-We can grab the exact same form details, copying the entire of `edit.hbs` and pasting it into `new.hbs`, then just changing the word "Update" where it appears to "Create". Don't forget to change the action!
+We can grab the exact same form details, copying the entire of `edit.hbs` and pasting it into `new.hbs`, then just changing the word "Update" where it appears to "Create". Don't forget to change the action! That will be `create`, this time course.
 
 Before we forget, we need to add a button to create a new item, and we need to put it into `app/templates/todo.hbs`. Under the list you can just put the following line to get a nicely styled button.
 
@@ -374,11 +387,9 @@ In theory what we need to return from the model hook is a blank Ember Object. In
 
 We also need an action, and this needs to do just a little more than the edit route. In particular it needs to add the new item to our listing. Conveniently, the listing is actually the model for our parent route, so we can add it on there.
 
-The total of the new.js file will be this:
+The `new.js` file will contain:
 
 ~~~~~~~~
-import Ember from 'ember';
-
 export default Ember.Route.extend({
   model(){
     return {};
@@ -411,11 +422,13 @@ There's only one real requirement left. A todo list that can't check off items i
 This action is surprisingly small. All we really want to do is toggle on and off a particular property on a given item that's passed into the action. To do this we just need to add the action object with this function to the todo route that already has the model.
 
 ~~~~~~~
-actions: {
-	checkItem(item){
-	  Ember.set(item, 'checked', !Ember.get(item, 'checked'));
-	}
-}
+// rest of the object
+    actions: {
+        checkItem(item){
+            Ember.set(item, 'checked', !Ember.get(item, 'checked'));
+        }
+    }
+});
 ~~~~~~~
 
 This takes in the item, and then uses `Ember.set` to update a property - checked, in this case. Using Ember.set instead of something like `item.checked = true` allows the change to propagate all through the app, keeping everything properly in sync. If you try and just set the property directly Ember Inspector will spit up warnings at you. The `Ember.get` plays a similar role, returning a safe version of the value of the property on that object, and the ! just causes it to invert. Again, this would be the point where we would be saving back to an API.
