@@ -456,7 +456,7 @@ The only other thing to do is add a checkbox with the action and a bit of stylin
         {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
         {{#link-to 'todo.edit' item}}
             {{fa-icon "pencil" class="pull-right edit-link"}}
-       	{{/link-to}}
+        {{/link-to}}
     </li>
 {{/each}}
 </ul>
