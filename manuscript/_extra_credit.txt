@@ -3,15 +3,15 @@
 
 As far as we're concerned, the job is done for the requirements given at the start. This was never intended to be a fully complete application, and a lot of functionality was always intended to be removed to simplify things. Nevertheless, we can take things a few more steps towards completion, and learn some handy stuff.
 
-Of particular interest is two bits of refactoring. We can add some persistence, meaning that we save our data. Typically this is to an API of some kind, but it doesn't have to be, and in this case it won't be. The other thing we're wanting to do is to implement components.
-
-Most JavaScript frameworks are based nearly completely on components. Their routers essentially choose which "parent component" to use. The component in those cases is the sort of first order object, the base building block. In Ember they're secondary, with the Route object forming the central object type for the application's structure. That being said, components **are** hugely important for Ember, and it's absolutely best-practice to use them liberally.
+Of particular interest are two bits of refactoring. We can add some persistence, meaning that we save our data. Typically this is to an API of some kind, but it doesn't have to be, and in this case it won't be. The other thing we're wanting to do is to implement components. Finally, we'll put in place some animations to smooth our interface.
 
 # Using Components
 
-Our routes and templates for todo items are a bit messy. Let's be honest, no one is going to use a todo list like this. They're going to want editing to be in-place. They're not going to ever want to go to the "page" for an item. And we have todo-related stuff scattered through several routes. It would be nice to be able to move that stuff out and make it all neater. Components allow us to do that, making self-contained elements. Components can be as small as a button, or as large as a whole form.
+Most JavaScript frameworks are based nearly completely on components. Their routers essentially choose which "parent component" to use. The component in those cases is the sort of first order object, the base building block. In Ember they're secondary, with the Route object forming the central object type for the application's structure. That being said, components **are** hugely important for Ember, and it's absolutely best-practice to use them liberally.
 
-Components are something I struggled to "get" for a long time. The best way to think of them is as a custom HTML element. There is a lot of behaviour in a HTML element such as a text input. It needs to support placeholders, that are grey and vanish if your type something else. They need to support things like max size, rejecting new input, handle options such as pattern. The browser does all this without your help. But they're necessarily generic. Components let you make html-like-elements that are specific to your application.
+Our routes and templates for todo items are a bit messy. Let's be honest, no one is going to use a todo list like this. They're going to want editing to be in-place. They're not going to ever want to go to the "page" for an item. And we have todo-related stuff scattered through several routes. It would be nice to be able to move that stuff out and make it all neater. Components allow us to do that, making self-contained elements. Components can be as small as a button, or as large as a whole form or page.
+
+Components are something I struggled to "get" for a long time. The best way to think of them is as a custom HTML element. There is a lot of behaviour in a HTML element such as a text input. It needs to support placeholders, that are grey and vanish if your type something else. They need to support things like max size, rejecting invalid input, handle options such as pattern. The browser does all this without your help. But they're necessarily generic. Components let you make html-like-elements that are specific to your application.
 
 T> For the record, you've actually already used components. The Link-to helper is actually a component for dealing with links, and the Font Awesome add-on gives us the `{{fa-icon}}` component. 
 
@@ -103,9 +103,11 @@ Clicking on our edit button should now give us a form, and the addition of a can
 
 ## Handling the save functionality
 
-We still need to handle the actual update function, but that's easy, just move it over from the `app/controllers/todo/edit.js` into `app/controllers/todo.js` controller and it should be fine. In fact you can now delete both that route and the controller once you nab its action. We also need to make sure we remove the entry from the router. It's worth noting that we're consolidating down a lot of flexibility here, which should really clean up our code. The `app/controllers/todo.js` file will contain nearly all of our functionality.
+We still need to handle the actual update function, but that's easy, just move it over from the `app/routes/todo/edit.js` into `app/routes/todo.js` controller and it should be fine. In fact you can delete that edit route once you nab its action. We also need to make sure we remove the entry from the router. It's worth noting that we're consolidating down a lot of flexibility here, which should really clean up our code. The `app/routes/todo.js` file will contain nearly all of our functionality.
 
-If you try to actually run this code it will simply do nothing. No error. Our controller has the action, but our component doesn't register it. The issue here is that the component creates its own context. It's triggering the updateItem action **inside the component**, but that doesn't exist, so it blocks the passage of the action. Our component todo-item javascript still needs to handle the action, even if that is just to pass the action through to the route. Components by their nature need to be passed in anything they need access to, but they also need to pass any action or event back out.
+If you try to actually run this code it will simply do nothing. No error. Our controller has the action, but our component doesn't register it. We talked a little earlier about the "context" being the controller and the template together. 
+
+The issue here is that the component creates its own context. It's triggering the updateItem action **inside the component**, but that doesn't exist, so it blocks the passage of the action. Our component todo-item javascript still needs to handle the action, even if that is just to pass the action through to the route. Components by their nature need to be passed in anything they need access to, but they also need to pass any action or event back out.
 
 The easiest way to do that is to add another simple action in our component javscript, alongside enable and disable of editing. The code is this. We've changed the names of the functions to make it a bit more consistent. 
 
@@ -138,9 +140,9 @@ We'll keep the same `isEditing` term, though it's not the best term in this crea
 
 ## Using the store in a Component
 
-As said earlier, components are intended to be self-contained isolated. This means that unlike Routes and Controllers, which have it super-available, components don't actually have access to the store. Though it **can** be injected in, there's a reason it's not available. If you think of your component as much like a HTML element, it would make no sense for an input tag, or a table tag, to know how to save data.
+As said earlier, components are intended to be self-contained isolated. This means that unlike Routes and Controllers, which have it super-available, components don't actually have access to the "store" for persisting stuff. Though it **can** be injected in, there's a reason it's not available. If you think of your component as much like a HTML element, it would make no sense for an input tag, or a table tag, to know how to save data.
 
-This is why these actions all belong on our controller.
+This is why these actions all belong on our route.
 
 ## Setting up the todo-new component
 
@@ -160,7 +162,7 @@ export default Ember.Component.extend({
 });
 ~~~~~~~~
 
-T> This is a perfect candidate for a mixin, which would allow everything following this "isEditing" pattern to share code. There would also be potentially a few other options for refactors, some of which would mean using no code at all. We're trying to keep things nice and explicit here, however.
+T> This is a perfect candidate for a mixin, which would allow everything following this "isEditing" pattern to share code. There would also be potentially a few other options for refactors, some of which would mean using no code at all. We're trying to keep things nice and explicit here, however. Look into the `mut` helper if you're curious.
 
 The implementation of the template is pretty simple, with this block now in `app/templates/todo.hbs`. 
 
@@ -173,12 +175,15 @@ The implementation of the template is pretty simple, with this block now in `app
 </ul>
 ~~~~~~~~
 
-We'll also take the code from `app/controllers/todo/new.js` create action and make a createItem in the `app/controllers/todo.js` route code. Change the create action to a createItem action. The only change you should need to make is the model collection. It's no longer from a parent route, it's now from right here. You can just use `this.get('model')`, instead of `this.modelFor('todo')`.
+We'll also take the code from `app/routes/todo/new.js` create action and make a createItem in the `app/routes/todo.js` route code. Change the create action to a createItem action. The only change you should need to make is the model collection. It's no longer from a parent route, it's now from right here. You can just use `this.get('model')`, instead of `this.modelFor('todo')`.
 
-The `app/controllers/todo.js` file should now contain a moderate amount of quite clear code, consisting of an object full of useful action functions. It should look more or less like this.
+The `app/routes/todo.js` file should now contain a moderate amount of quite clear code, consisting of a model hook to set up the template, and an object full of useful action functions. It should look more or less like this.
 
 ~~~~~~~~
-export default Ember.Controller.extend({
+export default Ember.Route.extend({
+    model(){
+        // the json blob we were returning here
+    },
 	actions: {
 		updateItem(item){
 			alert('item updated');
@@ -202,6 +207,7 @@ In this case, we end up with our complete component `todo-new.js` file looking l
 ~~~~~~~~
 export default Ember.Component.extend({
     isEditing: false,
+    item: {},
     actions: {
         enableEditing(){
             this.set('isEditing', true);
@@ -223,6 +229,22 @@ This does much the same as the previous updateItem code, just cleaning up a litt
 You'll notice that all of the code in the `routes/todo/new.js` file isn't particularly relevant. That's not a route anyone can or will go to now. You can happily delete it. In fact you can delete that whole directory, as well as the `app/templates/todo/` directory. Don't forget to delete the auto-generated unit tests! Note that you can actually run `ember destroy route todo/edit`, etc, and it will do all of this for you, including deleting no-longer-needed route, clearing the unnecessary tests, and stripping out the router. It should go without saying that this command should be used carefully.
 
 We've been able to remove a substantial amount of code, simplifying our interface substantially. We now have dedicated components for specific behaviours, and most importantly a better, and more useable system.
+
+## Fixing our tests
+
+If you go back and run `ember test` you'll notice that it now fails. We've made some drastic changes, and we **should** have changed the tests first, then updated the code. If you go back to our new item test at `tests/acceptance-tests/todo-new-test.js`, the behaviour here has changed. For the most part it's the same. Items are still created and still added to the list, the last item should still have the given text. But that final `assert.equal` no longer has any relevance. We don't have that route to link to any more. So just remove that line.
+
+~~~~~~~~
+    //rest of the test   
+    andThen(function() {
+        let itemList = find('.list-group-item');
+        let itemListLength = itemList.length;
+        let lastItemText = itemList.last().text().trim();
+ 
+        assert.equal(expectedLength, itemListLength);
+        assert.equal(itemText, lastItemText);
+    });
+~~~~~~~~
 
 # Persisting our data
 

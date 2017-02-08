@@ -58,7 +58,7 @@ Ember and Laravel divide these jobs differently. In a Laravel app the Router pre
 
 In the case of Ember, the Router handles 1, the Route (note the distinction) handles 2 & 3, while 4 is handled by Ember's conventions which dictate the template's location. From then on things are quite different. Ember's lifecycle is critically different from Laravel's set-and-forget. Everything has to stay live. Ember therefore needs to set up a "context", an environment where a template's values can be routinely set and modified. In principle this means binding a controller to handle the live-ness with a template. In practice the controller is often not needed. However, one of the core things a controller does is to handle actions that are occurring on the page. The more stuff a particular view does the more likely a controller is to be needed and useful.
 
-The role of a Route, therefore, is critical in Ember. It sets up everything that comes after. It gets model data, finds the template, and sets up the controller. It's always going to be our first step when adding new features or functionality. For now we'll put in only routes, but as we start adding functionality controllers will come into play.
+The role of a Route, therefore, is critical in Ember. It sets up everything that comes after. It gets model data, finds the template, and sets up the controller. It's always going to be our first step when adding new features or functionality. In this app we're going to be handling almost all of our code in Routes, and not using a controller at all. There are some complex reasons for this but it shouldn't be taken as any suggestion that there's anything wrong with controllers. They are recommended in a lot of places.
 
 W> If you do a lot of reading you'll quickly learn that Controllers in Ember are deprecated, dead, unnecessary, broken, being replaced or God only knows what else. It's true that a lot of the common use of Controllers is better put elsewhere now, but there is absolutely no intention of making controllers go away. Components take up a lot of their code, but they still have significant value, **especially** in a component heavy app.
 
@@ -264,7 +264,7 @@ This seems to be working now, but there's a bug in it. If you refresh the page, 
  
 Open your browser debug toolbar with F12 and you'll see a tab for Ember. For the most part that doesn't do anything, but when browsing an Ember app it starts to pop in a bunch of details for us.
  
-Of particular interest to us is the Routes section on the left hand side. If you click on that it will show us the structure of our Ember application's different route paths. In particular, it shows each Route, and what is populating that route. It will show you the application route, and in a higher level the about and todo route, inside which is the todo/show route. It also shows the resources that are used to make this. It will show you which route objects are present, the name, and what url pattern triggers that route. It will also show you what template and what controller are on the route. You'll notice that a lot of things are greyed out. All of these elements "exist", but some more than others. Every file or object listed here is something that's part of Ember's structure. But if not found, Ember will happily mock one up. For example, there is, and always has been, an application route for your Ember app. It's not at all uncommon to generate a real, concrete route file and put things inside that. We simply don't need that, but you'll notice there **is** an application template. 
+Of particular interest to us is the Routes section on the left hand side. If you click on that it will show us the structure of our Ember application's different route paths. In particular, it shows each Route, and what is populating that route. It will show you the application route, and in a higher level the about and todo route, inside which is the todo/show route. It also shows the resources that are used to make this. It will show you which route objects are present, the name, and what url pattern triggers that route. It will also show you what template and what controller are on the route. All of these elements "exist", but some more than others. Every file or object listed here is something that's part of Ember's structure. But if a concrete one is not found, Ember will happily mock one up. For example, there is, and always has been, an application route for your Ember app. It's not at all uncommon to generate a real, concrete route file and put things inside that. We simply don't need that, but you'll notice there **is** an application template, which we made earlier. 
  
 This is all very interesting, but to get a better idea of our issue here, we need to go to the View Tree tab. This shows the tree and what data it contains. If you click on the first item in our list, and then look down at the Name column where it says `todo.show` you'll see the Model shows a useful object with our text, checked status, etc. However, if you refresh that individual item, and you'll see the model changes to only include an id. And even that is just coming from the URL. 
 
@@ -349,17 +349,21 @@ If you edit the details, you'll notice that as you change the details in the fie
 
 ## Actions
 
-Actions in Ember can be handled on a route (as mentioned before) but in this case we'll handle it on the controller, the todo/edit controller, specifically. Step one is obviously making that controller.
+Actions in Ember can be handled on a controller (as mentioned before) but in this case we'll handle it on the route, the todo/edit route, specifically. Step one is obviously making that route.
 
 ~~~~~~~~
-ember g controller todo/edit
+ember g route todo/edit
 ~~~~~~~~
 
-If you open that file at `app/controllers/todo/edit.js` you'll see a new controller file, roughly the same as our default route, or really anything newly generated in Ember. We need to add an actions object to that controller, containing an update function.
+If you open that file at `app/routes/todo/edit.js` you'll see a new route file, roughly the same as our default route, or really anything newly generated in Ember. We need to add an actions object to that route, containing an update function.
 
 ~~~~~~~~
-//app/controllers/todo/edit.js
-export default Ember.Controller.extend({
+//app/routes/todo/edit.js
+export default Ember.Route.extend({
+    model() {
+        return this.modelFor('todo')
+            .find(item => +params.id === item.id);
+    },
     actions: {
         update(item){
             alert(item.text + ' saved');
@@ -419,7 +423,7 @@ So let's get started. Ignoring most of the wrapper, the bit we care about is the
 ~~~~~~~~
 visit('/todo');
 click('#new-item-button');
-fillIn('input.new-item-text', 'Some random text');
+fillIn('#new-item-text', 'Some random text');
 click('#create-item-button');
 ~~~~~~~~
  
@@ -441,20 +445,21 @@ So how do we confirm this stuff? There are a few things we need to verify. The m
 test('Creating a new todo item', function(assert) {
    
     const itemText = 'Some random text';
-    let itemLength = find('.list-group-item').length;
- 
+    const expectedLength = 5;
+    
     visit('/todo');
     click('#new-item-button');
-    fillIn('input.new-item-text', itemText);
+    fillIn('#new-item-text', itemText);
     click('#create-item-button');
    
     andThen(function() {
-        let newListLength = find('.li').length;
-        let lastItemText = find('.li:last-child').text();
+        let itemList = find('.list-group-item');
+        let itemListLength = itemList.length;
+        let lastItemText = itemList.last().text().trim();
  
-        assert.equal(itemLength + 1,  newListLength);
-        assert.equal(lastItemText, itemText);
-        assert.equal(currentURL(), '/todo/'+ newListLength);
+        assert.equal(expectedLength, itemListLength);
+        assert.equal(itemText, lastItemText);
+        assert.equal(currentURL(), '/todo/'+ itemListLength);
     });
 });
 ~~~~~~~~
@@ -499,20 +504,24 @@ export default Ember.Route.extend({
 });
 ~~~~~~~~
 
-We will also need an action. We'll put this on a controller, so we'll need another one. That one will be `ember g controller todo/new`. 
+We will also need an action.
 
 ~~~~~~~~
-export default Ember.Controller.extend({
+export default Ember.Route.extend({
+  model(){
+    return {};
+  },
   actions: {
     create(item){
 
       let collection = this.modelFor('todo');
-
-      collection.pushObject({
-          id: collection.length,
+      let newObject = {
+          id: collection.length+1,
           text: item.text,
           checked: false
-      });
+      };
+      collection.pushObject(newObject);
+      this.transitionTo('post.show', newObject);
     }
   }
 });
@@ -520,9 +529,9 @@ export default Ember.Controller.extend({
 
 A lot of that should be easy to follow. The actions object contains a single create function, which is passed the previously mentioned now-not-so-empty model. Inside that is where newer things are happening.
 
-The collection of all the different todo items is the model for the todo route, so we grab that. It's simply the easiest thing to do, and to be honest it most clearly reflects the intent here. This is an Ember Collection object, so we use the `pushObject` method to add a new item to it. We could just use the standard array push, but pushObject respects all the watchers and magic of Ember, making it immediately just as usable as any other item in our collection. Again, it would be typical to persist this new item back to the server as well, but a step not being taken by our demo application.
+The collection of all the different todo items is the model for the todo route, so we grab that. It's simply the easiest thing to do, and to be honest it most clearly reflects the intent here. This is an Ember Collection object, so we use the `pushObject` method to add a new item to it. We could just use the standard array push, but pushObject respects all the watchers and magic of Ember, making it immediately just as usable as any other item in our collection. Again, it would be typical to persist this new item back to the server as well, but a step not being taken by our demo application. Then we just redirect to the page for that item.
 
-If we run our `ember test` command again we will notice that the test now successfully passes. Congratulations, you are now an expert at  **BDD** and can put it on your resume. 
+If we run our `ember test` command again we will notice that the test now successfully passes. Congratulations, you are now an expert at  **BDD** and can put it on your resume.
 
 # Checking an item
 
@@ -536,13 +545,13 @@ And again, this is going to need some thinking through. What we want to do is cl
 
 ~~~~~~~~
 test('Creating a new todo item', function(assert) {
-   
-   var row = find('li:nth-child(2)');
-   
+ 
     visit('/todo');
-    click('.check-icon', row);
+    let row = find('li:nth-child(2)');
+    click('.list-group-item:nth-child(2) .check-icon');
     
     andThen(function() {
+        
         let rowIsChecked = row.hasClass('checked');
         assert.ok(isRowChecked);
     });
@@ -551,19 +560,21 @@ test('Creating a new todo item', function(assert) {
 
 If you run your `ember test` command again you'll find this doesn't pass, and for obvious reasons. We haven't done anything to this code that would make it work.
 
-## Adding the functionality
-
-So what we need to do is put an action in the todo list itself, and that means we need to add a controller for that as well. `ember g controller todo`.
-
-T> We should admit at this point that the actions we've created here could have been entirely written on the existing Route objects, rather than creating a controller. However, there are limits on what can access an action on a Route. In particular, components can only talk to actions that are on the controller - that is the "context" they run in. As we're wanting to refactor this later to use components and just clean up generally, we're going to stick with controllers.
-
 ## A simple action
 
-This action is surprisingly small. All we really want to do is toggle on and off a particular property on a given item that's passed into the action. To do this we just need to add the action object with this function to the todo controller.
+This action is surprisingly small. All we really want to do is toggle on and off a particular property on a given item that's passed into the action. To do this we just need to add the action object with this function to the todo route.
 
 ~~~~~~~
-//app/controllers/todo.js
-export default Ember.Controller.extend({  
+//app/routes/todo.js
+export default Ember.Route.extend({
+    model(){
+		return [
+			{id: 1, checked: false, text: 'Buy milk'},
+			{id: 2, checked: false, text: 'Buy bread'},
+			{id: 3, checked: false, text: 'Bring back Firefly'},
+			{id: 4, checked: false, text: 'Conquer planet'}
+		];
+	},
     actions: {
         checkItem(item){
             Ember.set(item, 'checked', !Ember.get(item, 'checked'));
@@ -572,9 +583,7 @@ export default Ember.Controller.extend({
 });
 ~~~~~~~
 
-This takes in the item, and then uses `Ember.set` to update a property - checked, in this case. Using Ember.set instead of something like `item.checked = true` allows the change to propagate all through the app, keeping everything properly in sync. If you try and just set the property directly Ember Inspector will spit up warnings at you. The `Ember.get` plays a similar role, returning a safe version of the value of the property on that object, and the ! just causes it to invert. Again, this would be the point where we would be saving back to an API.
-
-T> This could actually be written quite a bit more simply as `item.toggleProperty('checked');`, which is a shortcut for a lot of the above.
+This takes in the item, and then uses `Ember.set` to update a property - checked, in this case. Using Ember.set instead of something like `item.checked = true` allows the change to propagate all through the app, keeping everything properly in sync. If you try and just set the property directly Ember Inspector will spit up warnings at you. The `Ember.get` plays a similar role, returning a safe version of the value of the property on that object, and the ! just causes it to invert. Again, this would be the point where we could be saving back to an API.
 
 ## Connecting up the action in the template
 
