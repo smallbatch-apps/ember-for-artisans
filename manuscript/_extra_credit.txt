@@ -21,9 +21,11 @@ Components can exist in two forms, block and inline. A block component is denote
 
 Ember Components **must** be written to a specific naming convention, including a hyphen. So `todo` is not a valid component name, but `todo-item` is. This is mostly it's so that it's consistent with the upcoming Custom Elements spec. Once that is implemented, standardized and supported, Ember's own components can begin to be phased out.
 
-We can go ahead and make a component the expected way: `ember g component todo-item`.
+We can go ahead and make a component the expected way: `ember g component todo-form`.
 
-That will make two main files. It will create the `app/components/todo-item.js` and `app/templates/components/todo-item.hbs`. The hbs file is obviously the template, while the js file contains primarily any actions and properties of the component.
+That will make two main files. It will create the `app/components/todo-form.js` and `app/templates/components/todo-form.hbs`. The hbs file is obviously the template, while the js file contains primarily any actions and properties of the component.
+
+T> As with route and many other element, generated files can be created with the `--pod` flag to change the structure, in this case to `app/components/todo-form/script.js` and `app/components/todo-form/template.hbs`. I much prefer this format, personally.
 
 ## Component templates
 
@@ -31,11 +33,11 @@ Let's start playing around with the template first. The first thing you're going
 
 We're going to be replacing out the list item that contains the todo, so grab the contents of the list item in `app/templates/todo.hbs` and paste it right into our component template at `app/components/todo-item.hbs`. You don't need the actual li tag, just its contents, we'll deal with the li tag later.
 
-W> Make sure you delete the `{{if item.checked "...` section as well. Note that there's a trailing `">`` on the end of that. 
+W> Make sure you delete the `{{if item.checked "...` section of the `li` tag as well. Note that there's a trailing `">`` on the end of that. We'll have to recreate this functionality slightly differently.
 
 ## Embedding the component
 
-Using your new component is easy. Insert it as `{{todo-item}}`. The point of a component is that it shouldn't "know" anything. Like a HTML element, it has few real properties of its own, and all of its knowledge needs to be passed in when you use it. If you think about an `<input>`, it needs to be passed type, name, value, placeholder, etc. There are quite a few options we want on this one, so let's start passing stuff in. For a start, we need the actual item in there, from the model. So any sort of state or setting or data needs to be passed through, in this case `item=item`.
+Using your new component is easy. Insert it as `{{todo-form}}`. The point of a component is that it shouldn't "know" anything. Like a HTML element, it has few real properties of its own, and all of its knowledge needs to be passed in when you use it. If you think about an `<input>`, it needs to be passed type, name, value, placeholder, etc. There are quite a few options we want on this one, so let's start passing stuff in. For a start, we need the actual item in there, from the model. So any sort of state or setting or data needs to be passed through, in this case `item=item`.
 
 T> Note that this isn't considered best-practice. Just as you wouldn't pass the entire user to a text input, you would pass just the actual name, for good components you should be doing the same. In this case, for example, a todo-item becomes highly specific. It will only work with items, nothing else. We're ok with this, but it deserves to be mentioned.
 
@@ -51,9 +53,9 @@ Each component makes itself an HTML element when its embedded. By default it wil
 </ul>
 ~~~~~~~~
 
-T> Future versions of Ember will support angle bracket components, like `<todo-item>`, sticking even closer to the Custom Elements spec.
+T> Future versions of Ember will support angle bracket components, like `<todo-form>`, sticking even closer to the Custom Elements spec.
 
-If you go back to the browser you'll see that the interface still **looks** largely right, but we've broken it a bit. In particular, the edit link is still a link. We don't really want to go to that. We're going to want there wo be two different "states" for the item, normal, and edit mode. We'll do that by creating a simple boolean property on the component JavaScript at `app/components/todo-item.js`.
+If you go back to the browser you'll see that the interface still **looks** largely right, but we've broken it a bit. In particular, the edit link is still a link. We don't really want to go to that. We're going to want there wo be two different "states" for the item, normal, and edit mode. We'll do that by creating a simple boolean property on the component JavaScript at `app/components/todo-form.js`.
 
 ~~~~~~~~
 export default Ember.Component.extend({
@@ -103,87 +105,122 @@ Clicking on our edit button should now give us a form, and the addition of a can
 
 ## Handling the save functionality
 
-We still need to handle the actual update function, but that's easy, just move it over from the `app/routes/todo/edit.js` into `app/routes/todo.js` controller and it should be fine. In fact you can delete that edit route once you nab its action. We also need to make sure we remove the entry from the router. It's worth noting that we're consolidating down a lot of flexibility here, which should really clean up our code. The `app/routes/todo.js` file will contain nearly all of our functionality.
+Up to now, the switch to components hasn't been particularly significant. Because template code is **in** the component, it's largely unaffected. Where it does matter more is how actions and events work. Components are a more isolated approach, and while actions in our previous application structure bubble automatically, in components we need to handle that bubbling ourselves, calling the parent's actions. In the case of a deeply nested component structure (both common and recommended), that means some very fragile bubbling through potentially multiple layers of code.
 
-If you try to actually run this code it will simply do nothing. No error. Our controller has the action, but our component doesn't register it. We talked a little earlier about the "context" being the controller and the template together. 
-
-The issue here is that the component creates its own context. It's triggering the updateItem action **inside the component**, but that doesn't exist, so it blocks the passage of the action. Our component todo-item javascript still needs to handle the action, even if that is just to pass the action through to the route. Components by their nature need to be passed in anything they need access to, but they also need to pass any action or event back out.
-
-The easiest way to do that is to add another simple action in our component javscript, alongside enable and disable of editing. The code is this. We've changed the names of the functions to make it a bit more consistent. 
+Thankfully there **is** a better way. We will start off by creating a controller. The choice to put all the actions on the Route was totally valid previously. It was a very "routy" application, and our subroutes wanted access to the parent model, etc. That sort of thing is much easier in routes. But here we want more control over our action handling. Actions in components are most easily run "in context", that context in this case being the controller.
 
 ~~~~~~~~
-	updateItem(item) {
+ember g controller todo
+~~~~~~~~
+
+We still need to handle the actual update function, but that's easy, just move it over from the `app/routes/todo/edit.js` into `app/controllers/todo.js` controller and it should be fine. In fact you can delete that edit route once you nab its action. We also need to make sure we remove the entry from the router. It's worth noting that we're consolidating down a lot of flexibility here, which should really clean up our code. The `app/controllers/todo.js` file will contain nearly all of our actions and functionality, while the components themselves handle their own state.
+
+If you go to  it will simply do nothing. No error. Our controller has the action, but our component doesn't register it. We talked a little earlier about the "context" being the controller and the template together. 
+
+The issue here is that the component creates its own context. It's triggering the updateItem action **inside the component**, but that doesn't exist, so it blocks the passage of the action. Our component todo-form javascript still needs to handle the action, even if that is just to pass the action through to the controller. Components by their nature need to be passed in anything they need access to, but they also need to pass any action or event back out. So we can actually pass in an action function directly to the component, and then tell it to execute it.
+
+~~~~~~~~
+{{todo-item item=item tagName="li" class="list-group-item" saveAction=(action "updateItem")}}
+~~~~~~~~
+
+We also need to add another simple action in our component javscript, alongside enable and disable of editing. The code is this. We've changed the names of the functions to make it a bit more consistent. 
+
+~~~~~~~~
+	saveItem(item) {
 		this.set('isEditing', false);
-		this.sendAction('action', item);
+		this.attrs.saveAction(item);
 	}
 ~~~~~~~~
 
-As well as flicking along the action up the chain until it reaches the route where our code is, we set the `isEditing` flag to false again to close the form.
+There's a lot to this. None of it is anywhere nearly as complex as I thought, and as a result I struggled to understand this for some time. I thought there was a lot more *magic* involved than there actually is. For a start, we set the `isEditing` flag to false again to close the form. That bit is fairly obvious.
 
-There is another change we need to do in order to make this work, which is that we need to tell the component what the default action is, the one that we'll be passing along. In this case, it's our updateItem. Our invocation of the todo-item component will look like this.
+There are two key things that I think are needed to make it more clear what's happening here. First of all, it's important to really understand what the `action` helper is doing. The action helper simply creates a function from a given string. That string is the name of an action in a given context - in this case the controller. The action helper wraps up that context and creates a function, so that concepts like `this.get` still have meaning. Because it does this, the action helper creates a function that is completely portable and can be passed around and executed from anywhere.
 
-~~~~~~~~
-	{{todo-item item=item tagName="li" class="list-group-item" action="updateItem"}}
-~~~~~~~~
+The second thing to understand is that all of the `saveItem` functions are different. There's no inherent magic binding happening here. When we click the action on the "Update" button, it simply executes the component's saveItem function. In that function we are explicitly calling another function. In components, `this.attrs` is the attributes passed in when creating the component. It's a simple map of key/value pairs. You should be able to get `this.attrs.tagName` for example, and see the value 'li'. Which is neither interesting nor useful, but the action we pass in **is** very useful.
+
+In this case, the `saveAction` attribute is a function, and as such it can be directly executed as `this.attrs.saveAction(item)` passing straight through the item given in by the component action call.
+
+T> Note that we're inventing these names, and there's not necessarily any reason to call it `saveAction`, but otherwise we end up with `saveItem=(action "saveItem")` which calls the `saveItem` function which executes `this.attrs.saveItem`, and it gets pretty unclear what comes from where.
+
+One you fully **get** this it's surprisingly simple and powerful, as we'll see from our next example.
 
 ## Creating A New Item - Component
 
-We'll make another new component, specifically to handle the "new" interface. 
+It might seem like the obvious solution is to make another component to form the "new" interface. But in truth, we already have the component we need. We can just re-use the `todo-form` component.
+
+Again, we've got some actions in a route that we want to have in the controller, in particular, `create`. We'll rename it `createItem` here, just to be more explicit and in line with other functions. Unfortunately, the action here is going to need quite a bit of refactoring. TODO
+
+Because we're just reusing our editing component we end up with an `isEditing` property. That's not the most ideal terminology, but it's clear what it means, so we'll just use it as-is.
+
+## New Item component - action and template.
+
+We already have all of the enable and disable editing functionality in our component. We only need to make one change. In its "default" state, with editing off, our normal todo-form components display a list-item with an edit pencil, and the task. This obviously doesn't apply to the new item. We want a button, but **then** the same form. This means we need a little bit of logic in our template, and to pass in a new attribute to our component.
 
 ~~~~~~~~
-ember generate component todo-new
+{{todo-form isNew=true ... }}
 ~~~~~~~~
 
-The process again is much the same. Grab chunks of interface and stuff them into the component templates. Grab actions and stuff them into the component object. Add a property to set the scope and we're done.
-
-We'll keep the same `isEditing` term, though it's not the best term in this creation context. It just means we can copy and paste the exact same code for both our property and the actions.
-
-## Using the store in a Component
-
-As said earlier, components are intended to be self-contained isolated. This means that unlike Routes and Controllers, which have it super-available, components don't actually have access to the "store" for persisting stuff. Though it **can** be injected in, there's a reason it's not available. If you think of your component as much like a HTML element, it would make no sense for an input tag, or a table tag, to know how to save data.
-
-This is why these actions all belong on our route.
-
-## Setting up the todo-new component
-
-The todo-new component is a very simple one. It has the same principles as earlier, showing a form only if in editing mode. Its action function lives on the route. 
+We now need to make the template use this property to determine whether to show the button or the todo item. You don't need to pass in `isNew=false` to your list items, it's fine without them. Our completed component template should look something like this.
 
 ~~~~~~~~
-export default Ember.Component.extend({
- isEditing: false,
- actions: {
- 	enableEditing(){
- 		this.set('isEditing', true);
- 	},
- 	disableEditing(){
- 		this.set('isEditing', false);
- 	}
- }
-});
+{{#if isEditing}}
+    <div class="form-group">
+      <label for="text">Text</label>
+      {{input value=item.text class="form-control"}}
+    </div>
+    <div class="form-group">
+      <button class="btn btn-info"{{action "saveItem" item}}>{{fa-icon "cloud-upload"}} Update</button>
+    </div>
+{{else}}
+    {{#if isNew}}
+        <button class="btn btn-info" {{action 'saveItem'}}>
+            {{fa-icon "plus-circle"}} Add New
+        </button>
+        {{fa-icon "times" action=(action "disableEditing") class="pull-right cancel-edit"}}
+    {{else}}
+        {{fa-icon 
+          (if item.checked "check-square-o" "check-square-o")
+          monospace=true
+          action=(action "checkItem")
+        }}
+        {{/if}}
+        <span class="edit-text {{if item.checked 'checked'}}">{{item.text}}</span>
+	    <span {{action 'enableEditing'}} class="pull-right edit-link">
+            {{fa-icon "pencil"}}
+        </span>
+    {{/if}}
+{{/if}}
 ~~~~~~~~
 
-T> This is a perfect candidate for a mixin, which would allow everything following this "isEditing" pattern to share code. There would also be potentially a few other options for refactors, some of which would mean using no code at all. We're trying to keep things nice and explicit here, however. Look into the `mut` helper if you're curious.
+This code has evolved over time, and gotten quite complicated. That's OK, because it's doing quite a lot of things. In particular, we've got a lot of functionality glommed into the actual icons now. Of particular note is the `fa-icon` for the checkbox, which has a lot of properties set, including an inline "if" to determine what to use, the action required, and a monospace option. Monospace here just makes the icon a pre-defined size. The checked and unchecked versions are a slightly different size otherwise, and shift around.
 
-The implementation of the template is pretty simple, with this block now in `app/templates/todo.hbs`. 
+We could do something similar with our pencil icon, putting actions and class on the icon. It could have the same pattern as the checkbox in that respect. Either option is valid. Using both together probably isn't ideal.
+
+T> You'll note a suprising amount of this interface is just turning things on and off. We're trying to keep things nice and explicit here, however there would be an opportunity for a refactor here. Look into the `mut` helper if you're curious. By using something like `{{action (mut "isEditing") true}}` you can actually eliminate the `enableEditing` method and its partner altogether, setting the values directly in the template. 
+
+We also need to support our checkItem function in the same was as our saveitem. The implementation of the template is pretty simple, with this block now in `app/templates/todo.hbs`. 
 
 ~~~~~~~~
 <ul class="list-group">
 {{#each model as |item|}}
-	{{todo-item item=item tagName="li" class="list-group-item" action="updateItem"}}
+	{{todo-form item=item tagName="li" 
+	    class="list-group-item" 
+	    saveAction=(action "updateItem")
+	}}
 {{/each}
-{{todo-new tagName="li" class="list-group-item" action="createItem"}}
+{{todo-form isNew=true tagName="li" class="list-group-item" saveAction=(action "createItem")}}
 </ul>
 ~~~~~~~~
 
-We'll also take the code from `app/routes/todo/new.js` create action and make a createItem in the `app/routes/todo.js` route code. Change the create action to a createItem action. The only change you should need to make is the model collection. It's no longer from a parent route, it's now from right here. You can just use `this.get('model')`, instead of `this.modelFor('todo')`.
+The change noted here is that we're passing in a different action as saveAction. This means when `this.attrs.saveAction(item)` is executed it will do different things, while taking the exact same code path. The other point that might be easily missed is that we no longer pass in `item=item` in our new item component. There's no reasonable thing to call "item" in this case. And as we're not using a route, we can't create an empty object either. However, if we don't have an item, Ember has nothing to perform its edits on.
 
-The `app/routes/todo.js` file should now contain a moderate amount of quite clear code, consisting of a model hook to set up the template, and an object full of useful action functions. It should look more or less like this.
+The solution is surprisingly simple, just add an `item: {}` property to the component JS. The passed in element will override it if need be, but new items have a blank default.
+
+The `app/controllers/todo.js` file should now contain a moderate amount of quite clear code, consisting of a few actions. It should look more or less like this.
 
 ~~~~~~~~
-export default Ember.Route.extend({
-    model(){
-        // the json blob we were returning here
-    },
+export default Ember.Controller.extend({
+
 	actions: {
 		updateItem(item){
 			alert('item updated');
@@ -195,6 +232,10 @@ export default Ember.Route.extend({
                 checked: false
             });
 			alert('item created');
+        },
+        checkItem(item){
+            item.set('checked', !item.get('checked'));
+            alert('item checked');
         }
 	}
 });
@@ -202,7 +243,7 @@ export default Ember.Route.extend({
 
 We're not quite done with this yet. A component needs to have data passed into it. We passed in an item to the todo-item component, and that was fine. The item previously we generated as the model hook from the route. But now there's no route for this element anymore. We need some place to put the `item` object. The obvious place is in the component itself. We can put an arbitrary element on there, and that can just give it a start.
 
-In this case, we end up with our complete component `todo-new.js` file looking like this.
+In this case, we end up with our complete component `todo-form.js` file looking like this.
 
 ~~~~~~~~
 export default Ember.Component.extend({
@@ -215,18 +256,24 @@ export default Ember.Component.extend({
         disableEditing(){
             this.set('isEditing', false);
         },
-        createItem(item){
+        saveItem(item){
             this.set('isEditing', false);
-            this.set('item', {});
-            this.sendAction('action', item);
+            // optional: if making a new item, 
+            // blank out the form after saving
+            if(this.attrs.isNew) {
+                this.set('item', {});
+            }
+            this.attrs.saveAction(item);
+        },
+        checkItem(item){
+            item.set('checked', !item.get('checked'));
+            this.attrs.saveItem(item);
         }
     }
 });
 ~~~~~~~~
 
-This does much the same as the previous updateItem code, just cleaning up a little and then passing on the action for the route to handle. In this case we want to do a little more cleaning than before. When a user clicks the save button we want to stop it being in edit mode, but we also don't want it to have the old text in the fields. We set the item again, back to an empty array again.
-
-You'll notice that all of the code in the `routes/todo/new.js` file isn't particularly relevant. That's not a route anyone can or will go to now. You can happily delete it. In fact you can delete that whole directory, as well as the `app/templates/todo/` directory. Don't forget to delete the auto-generated unit tests! Note that you can actually run `ember destroy route todo/edit`, etc, and it will do all of this for you, including deleting no-longer-needed route, clearing the unnecessary tests, and stripping out the router. It should go without saying that this command should be used carefully.
+You'll notice that all of the code in the `routes/todo/new.js` file isn't particularly relevant. That's not a route anyone can or will go to now. You can happily delete it. In fact you can delete that whole `app/routes/todo/` directory, as well as the `app/templates/todo/` directory. Don't forget to delete the auto-generated unit tests! Note that you can actually run `ember destroy route todo/edit`, etc, and it will do all of this for you, including deleting no-longer-needed route, clearing the unnecessary tests, and stripping them  out of the router. It should go without saying that this command should be used carefully. If you delete manually, make sure you remove the router entries.
 
 We've been able to remove a substantial amount of code, simplifying our interface substantially. We now have dedicated components for specific behaviours, and most importantly a better, and more useable system.
 
@@ -279,7 +326,7 @@ T> If you know in advance what you want in an Ember Data model, you can actually
 
 Adapters tell Ember Data what the rules are for reading the model's actual persisted form. Is it a RESTful API? Some sort of SOAP call? A backend-as-a-service like Firebase? An S3 instance?
 
-As much as possible we do **not** care about this, we just want to know that when we call `model.find(12)` our model will be sent back from the server. All the rules and implementation details live in the adapter.
+As much as possible we do **not** care about this, we just want to know that when we call `model.find(12)` our model will be sent back from the server. All the rules and implementation details of how to achieve that should live in the adapter.
 
 Adapters sound hard to set up, but they're not. Common standards - such as Rails Active Record or REST - have standard addons that work right up. In fact, if you set **no** adapter it uses something very like REST by default, which is the JSON-API spec.
 
@@ -315,9 +362,7 @@ export default LSAdapter.extend({
 
 Where the adapter handles how to read the data, serializers handle how to write it. Most often serializers are simple things, just passing through whatever they're sent, but in cases with complex rules or specific requirements they're the place you want to implement those, converting your `firstName` field to the API's required `FIELD_FIRST_NAME` or whatever.
 
-Serializers are generated the same way as adapters, enough so that I'm not actually going to give the command to do it.
-
-The code generated will again need to be updated to make it a LocalStorage serializer rather than the generic.
+Serializers are generated the same way as adapters, enough so that I'm not actually going to give the command to do it. The code generated will again need to be updated to make it a LocalStorage serializer rather than the generic default.
 
 ~~~~~~~~
 import LSSerializer from 'ember-localstorage-adapter';
@@ -329,7 +374,7 @@ export default LSSerializer.extend({
 
 ## Using Ember Data in our Todo Route
 
-Using Ember Data models in a route is super easy. All we have to do is replace out the contents of the model hook with fancy Ember Data calls. Ember Data collections have some special functions on them to make finding and filtering data easy. The simplest is just to return the whole lot, which is what we actually want anyway.
+Using Ember Data models in a route is super easy. All we have to do is replace out the hard-coded contents of the model hook with fancy Ember Data calls. Ember Data collections have some special functions on them to make finding and filtering data easy. The simplest is just to return the whole lot, which is what we actually want anyway.
 
 ~~~~~~~~
 model() {
@@ -337,64 +382,101 @@ model() {
 }
 ~~~~~~~~
 
-This just finds all the todo items which are valid ember models. This means it gets data from the server (or in this case, local storage pretending to be a server) and returns that.
+This just finds all the todo items which are valid Ember models. This means it gets data from the server (or in this case, local storage pretending to be a server) and returns that. The "store" deserves some discussion. The store in Ember is its local collection of data. The store can also be used to get data from the server, but they're not synonymous. Data can be in the store but not in the server, and vice versa, or it can be in different states in both. A new item, for example, will be added to the store, but must be saved before its available on the server. Ember has special methods for checking **just** the local collection, typically called `peek`, but we're using its `find` methods here, which will check the server, or more accurately the persistence layer.
 
 Initially no data will be returned, as we haven't made any todo items yet, and we killed our pasted in test ones. Worth mentioning that none of the rest of our code handling these items needs to change. It was always nicely isolated.
 
 T> We don't have our show route for a single todo item any more, but if we did it would have this in its model hook: `return this.store.findRecord('todo', id);`.
 
-## Creating Items
+## Creating Items and saving changes
 
-With no items to edit or display, there's really not a lot here worth seeing. The first thing to do is to update the `app/controllers/todo.js` controller actions in a few places. We need it to do more than just add to the collection, because that's just the stuff Ember is aware of, not the data that's actually on the server. We also need to change the createItem object to make it an Ember Data model.
+With no items to edit or display, there's really not a lot here worth seeing. The first thing to do is to update the `app/controllers/todo.js` controller actions in a few places. We need it to do more than just add to the collection, because that's just the stuff Ember is aware of, not the data that's actually on the server.
 
-We'll do that first, and it's only a small code change.
+We'll do that first, and it's only a small code change. We literally just need to replace our `alert` functions with `item.save()`. Running that code will persist the changes to our "server". 
 
-~~~~~~~~
-model(){ 
-	return store.createRecord('todo', {
-  		text: '',
-  		checked: false
-	});
-}
-~~~~~~~~
-
-This new model is created and added to the store, but it's not saved to anything yet. We handle that in the action. Because our model is actually a proper Ember Data model, the process here becomes quite a bit simpler.
+The actions we have don't do a lot. All they do is show an alert, which is fine when messing around with test data, but not exactly ideal with persistent data. We need to persist any changes we make. Thankfully that's trivial.
 
 ~~~~~~~~
-actions: {
-	create(model){
-		this.store.pushObject(model);
-		model.save();
+export default Ember.Controller.extend({
+	actions: {
+		updateItem(item){
+			item.save();
+		},
+		createItem(item){
+            this.get('store').createRecord({
+                text: item.text,
+                checked: false
+            }).save();
+        },
+        checkItem(item){
+            item.set('checked', !item.get('checked'));
+            item.save();
+        }
 	}
-}
+});
 ~~~~~~~~
 
-## Handling updates
 
-The updating of data is not much different to how it is now. The only difference is that we no longer have an edit route, so we can't put the action on the edit route. We can put it on the todo route, though. So let's move that entirely as-is.
+You'll probably be noticing at this point how little code is needed here. `item.save()` is a crazy small amount of code to write to persist our data. The only variation is that the `createItem` method doesn't take in a valid model persistable model, but creating a record does, so it's that we save.
 
-The action we have doesn't do a lot. All it does is show an alert, which is fine when messing around with test data, but not exactly ideal with persistent data. We need to persist any changes we make. Thankfully that's trivial.
+It should be noticed that this code would **not change** if we were writing back to a Laravel server, NodeJS or anything else. This code doesn't have to know or care how it's persisted or where. The details of **how** to save are handled in Ember Data, in particular in that localStorage serializer we added in before.
 
-~~~~~~~~
-actions: {
-	update(item){
-		item.save();
-		alert('saved');
-	}
-}
-~~~~~~~~
+# Animation
 
-You'll probably be noticing at this point how little code is needed here. `item.save()` is a crazy small amount of code to write to persist our data. It should be noticed that this code would **not change** if we were writing back to a Laravel server, or anything else. This code doesn't have to know or care how it's persisted or where. The details of **how** to save are handled in Ember Data, in particular in that localStorage adapter and serializer we added in before.
+## Liquid Fire and The purpose of Animation
 
-## Updating our checking
+Liquid Fire is Ember's semi-official animation add-on. It's most particularly good for animating transitions between routes, or between states of an interface. Used effectively, animations make an interface more engaging and intuitive. Used badly they make it feel slow and clumsy. It's important to have a clear vision for animations, as well as to keep them both consistent, and fast.
 
-There's very little to do here. Again, nothing much needs to change except to persist the existing updates. The action for this is already on the todo route - it is a feature of the list, after all. So we don't have to move it.
+Speed is critical. You're deliberately interrupting the action the user has requested, and as a result, you're obliged to get the hell out of the way as soon as possible.
+
+Installation is the same as any other add-on in Ember: `ember install liquid-fire`
+
+Unfortunately Liquid Fire lacks some of the ergonomics and polish of other add-ons we've used, but we can work around it. Liquid Fire works in one of two ways. The primary way is by use of a transitions map. This tells Liquid Fire that when it comes to certain specific transitions it should use this particular animation, and in this way. The transition map is not an Ember file, and needs to be made manually at `app/transitions.js`. The contents of that file are as follows, just to stop it breaking.
 
 ~~~~~~~~
-actions: {
-	checkItem(item){
-	  Ember.set(item, 'checked', !Ember.get(item, 'checked'));
-	}
-}
+export default function(){
+};
 ~~~~~~~~
 
+Obviously that doesn't do anything on its own and future code referenced here goes **inside** this anonymous JavaScript function.
+
+Transitions are then handled as a series of function calls, essentially `this.transition(/*list of arguments*/)`. The typical format is a `fromRoute`, `toRoute`, and which transition animation to `use`. A `reverse` is also often used, as a shortcut for making the entire thing again, only backwards.
+
+Our simple app only has a few routes, so let's do an example of the transition from about to todo.
+
+~~~~~~~~
+this.transition(
+    this.fromRoute('about'),
+    this.toRoute('todos'),
+    this.use('toLeft'),
+    this.reverse('toRight')
+);
+~~~~~~~~
+
+If you look at your application now and click from the about to the index you'll notice... no change. We're missing a step. We need to change the outlet, from Ember's default to the special Liquid Fire one. If you open `app/templates/application.hbs` you can replace the `{{outlet}}` with `{{liquid-outlet}}` and the animations should kick in.
+
+We can now do some more transitions, handling all other route transitions, specifically about to index, and index to todos. As you can imagine, with a large application this could be an extreme number of transitions, as they grow out exponentially. However, there's a handy shortcut we can take. The from **and** to route are both optional, in that you only need one of them. As a result you can simply set one of them when they're on the end of a navigation bar, and greatly simplify the process. In fact all of our route transitions are covered with this:
+
+~~~~~~~~
+export default function(){
+
+  this.transition(
+    this.toRoute('todos'),
+    this.use('toLeft'),
+    this.reverse('toRight')
+  );
+
+  this.transition(
+    this.toRoute('index'),
+    this.use('toRight'),
+    this.reverse('toLeft')
+  );
+  
+};
+~~~~~~~~
+
+Outlet transitions aren't the only place we can benefit from Liquid Fire, nor the only way to use it. We can also make liquid versions of other helpers. Usefully, we can replace our todo-form component `{{if isEditing}}` with a `liquid-if`. In principle we could add this to `transitions.js`, but there's a nicer way. We can add our animation directly onto the the `liquid-if`. The simplest way to do this is to simply set a "use" attribute. That's the way to set what animation to use in the transition. It's not well documented (if at all) but you can also set a reverse animation. This makes it possible to do something like `{{if isEditing use="toUp" reverse="toDown"}}`. This is a quite effective look, and crossFade works well too. Most interestingly, just leaving a `liquid-if` without any animation at all causes a slight slide effect, which looks better than a standard `if`, which just flicks in and out.
+
+There's very little else we can do with this app now. It should be working for local persistence, and is animated. There are missing features here, of course. Notably, you can't delete an item. We could keep polishing this site, adding new features. But there isn't a lot of point. We've made a solid effort on an Ember driven app. This is only the start. Ember is at its best when working with very large applications. So for now, it's time to put this app to bed and consider it complete.
+
+There will be a follow up to this, a more advanced and ambitious application that will deal with a great deal more complexity and much more real-world business requirements. We'll implement that using the powerful combination of Laravel and Ember. In the process we'll cover a lot more of authentication, testing, and use some of Ember's more advanced and powerful add-ons. 
