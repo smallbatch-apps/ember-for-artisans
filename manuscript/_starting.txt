@@ -5,7 +5,7 @@
 
 One of the best features of Ember is Ember CLI. It's a friend, a companion, maybe even a lover. 
 
-## Installing Ember and Creating a new Project
+## Installing Ember and creating a new project
 
 Step one of starting with Ember is to install Ember CLI globally to your system. This assumes NPM is available, of course. On any reasonble and current dev machine it should be.
 
@@ -98,7 +98,7 @@ What's happening here is one of the great strengths of Ember. It has a strong ph
 
 # Starting with Models
 
-## A more useful Route
+## A more useful route
 
 Very few routes are going to be that static. If you're using the SPA pattern to build entirely static content you need to have a good long think about what you're doing with your life. We're going to now use the same process to build a second route.
 
@@ -113,14 +113,14 @@ This route is going to list all the todo items, so it's going to be much less st
 ~~~~~~~~~
 // app/todo/route.js
 export default Ember.Route.extend({
-	model(){
-		return [
-			{id: 1, checked: false, text: 'Buy milk'},
-			{id: 2, checked: false, text: 'Buy bread'},
-			{id: 3, checked: false, text: 'Bring back Firefly'},
-			{id: 4, checked: false, text: 'Conquer planet'}
-		];
-	}
+  model(){
+    return [
+      {id: 1, checked: false, text: 'Buy milk'},
+      {id: 2, checked: false, text: 'Buy bread'},
+      {id: 3, checked: false, text: 'Bring back Firefly'},
+      {id: 4, checked: false, text: 'Conquer planet'}
+    ];
+  }
 });
 ~~~~~~~~~
 
@@ -143,7 +143,7 @@ Looping over model data is nice and easy. Ember (like Blade or any other templat
 
 <ul>
 {{#each model as |item|}}
-	<li>{{item.text}}</li>
+  <li>{{item.text}}</li>
 {{/each}}
 </ul>
 
@@ -164,16 +164,16 @@ We can provide a number of arguments to this thing, but the basic usage is a sin
 
 ~~~~~~~~
 <ul>
-    <li>{{#link-to 'index'}}Home{{/link-to}}</li>
-    <li>{{#link-to 'about-us'}}About Us{{/link-to}}</li>
-    <li>{{#link-to 'todo'}}ToDo List{{/link-to}}</li>
+  <li>{{#link-to 'index'}}Home{{/link-to}}</li>
+  <li>{{#link-to 'about-us'}}About Us{{/link-to}}</li>
+  <li>{{#link-to 'todo'}}ToDo List{{/link-to}}</li>
 </ul>
 
 
 {{outlet}}
 ~~~~~~~~
 
-## Understanding Outlets
+## Understanding outlets
 
 Clicking between these is now handled as a transition inside the app. You'll note that the URL changes, but the interface doesn't really move around, as only the content of the `{{outlet}}` is changing. It's hard to really tell on such a simple site. This is now legitimately a single page app. It might not do much yet, but it really hasn't taken a lot of effort to make it go, either. Ember is dedicated to making Single Page Apps quick and easy to produce.
 
@@ -208,9 +208,9 @@ One thing we will do is "fix" the nav with large slabs of Bootstrap boilerplate 
 ~~~~~~~~
 <nav class="navbar navbar-default">
 <ul class="nav navbar-nav">
-    <li>{{#link-to 'index'}}Home{{/link-to}}</li>
-    <li>{{#link-to 'about-us'}}About Us{{/link-to}}</li>
-    <li>{{#link-to 'todo'}}ToDo List{{/link-to}}</li>
+  <li>{{#link-to 'index'}}Home{{/link-to}}</li>
+  <li>{{#link-to 'about-us'}}About Us{{/link-to}}</li>
+  <li>{{#link-to 'todo'}}ToDo List{{/link-to}}</li>
 </ul>
 </nav>
 ~~~~~~~~
@@ -247,9 +247,9 @@ Rather than typing this URL in to check it, we're going to link to it properly. 
 ~~~~~~~~
 <ul class="list-group">
 {{#each model as |item|}}
-	<li class="list-group-item">
-        {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
-    </li>
+  <li class="list-group-item">
+    {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
+  </li>
 {{/each}}
 </ul>
 ~~~~~~~~
@@ -262,14 +262,14 @@ We have a template now as part of this generation, and it should be at `app/todo
 ~~~~~~~~
 <!-- app/todo/show.hbs -->
 <div class="container">
-	<div class="form-group">
-		<label>Text:</label>
-		<p class="form-control-static">{{model.text}}</p>
-	</div>
-	<div class="form-group">
-		<label>Status:</label>
-		<p class="form-control-static">{{model.checked}}</p>
-	</div>
+  <div class="form-group">
+    <label>Text:</label>
+    <p class="form-control-static">{{model.text}}</p>
+  </div>
+  <div class="form-group">
+    <label>Status:</label>
+    <p class="form-control-static">{{model.checked}}</p>
+  </div>
 </div>
 ~~~~~~~~
 
@@ -296,17 +296,17 @@ Note that in this case we need to pass the parameters into the model hook. That 
 ~~~~~~~~~
 // app/todo/show.js
 export default Ember.Route.extend({
-	model(params){
-		let items = this.modelFor('todo');
-		return items.find(function(item){
-			return +params.id === item.id;
-		});
-	}
+  model(params){
+    let items = this.modelFor('todo');
+    return items.find(function(item){
+      return +params.id === item.id;
+    });
+  }
 });
 
 // alternatively shorter form ES6
 return this.modelFor('todo')
-    .find(item => +params.id === item.id);
+  .find(item => +params.id === item.id);
 ~~~~~~~~~ 
 
 If the `+params.id` part is confusing, it's an unusual but standard syntax. This isn't Ember, it's just a JavaScript unary operator.
@@ -328,7 +328,7 @@ This is a key for Ember that took me a while to really **get**. You should be th
 
 The `edit` route needs another model hook, which is the exact same code as the `show` model hook, so just grab that and paste it into the routes file, which in this case is located at `app/routes/todo/edit.js`. 
 
-## The Input Helper
+## The input helper
 
 Much like links, inputs are an important part of an Ember app, as they are where user changes happen. As such, they have a special helper. As well as the obvious properties, such as `class`, the input helper critically takes a value property. That value is the model property being edited or created. The `app/templates/todo/edit.hbs` file should look very much like the following.
 
@@ -337,11 +337,11 @@ Much like links, inputs are an important part of an Ember app, as they are where
 <h3 class="no-top-margin">Update Todo Item</h3>
 
 <div class="form-group">
-    <label for="text">Text</label>
-    {{input value=model.text class="form-control"}}
+  <label for="text">Text</label>
+  {{input value=model.text class="form-control"}}
 </div>
 <div class="form-group">
-    <button class="btn btn-info"{{action "update" model}}>{{fa-icon "cloud-upload"}} Update</button>
+  <button class="btn btn-info"{{action "update" model}}>{{fa-icon "cloud-upload"}} Update</button>
 </div>
 ~~~~~~~~
 
@@ -350,12 +350,12 @@ Again, we'll update the todo loop to provide a link to this new edit route, as w
 ~~~~~~~~
 <ul class="list-group">
 {{#each model as |item|}}
-    <li class="list-group-item">
-    {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
-    {{#link-to 'todo.edit' item}}
-        {{fa-icon "pencil" class="pull-right edit-link"}}
-    {{/link-to}}
-    </li>
+  <li class="list-group-item">
+  {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
+  {{#link-to 'todo.edit' item}}
+    {{fa-icon "pencil" class="pull-right edit-link"}}
+  {{/link-to}}
+  </li>
 {{/each}}
 </ul>
 ~~~~~~~~
@@ -377,21 +377,21 @@ If you open that file at `app/routes/todo/edit.js` you'll see a new route file, 
 ~~~~~~~~
 //app/routes/todo/edit.js
 export default Ember.Route.extend({
-    model() {
-        return this.modelFor('todo')
-            .find(item => +params.id === item.id);
-    },
-    actions: {
-        update(item){
-            alert(item.text + ' saved');
-        }
+  model() {
+    return this.modelFor('todo')
+      .find(item => +params.id === item.id);
+  },
+  actions: {
+    update(item){
+      alert(item.text + ' saved');
     }
+  }
 });
 ~~~~~~~~
 
 Actions in Ember aren't always easy to follow, so we'll stop here for a moment and talk about how they work. The use of the action helper - `{{action 'actionName'}}` binds that element to an event. By default this is a click, and so you don't need to explicitly say that. When the event is triggered, Ember looks around for an action to run. It "bubbles" the event up through the application. The first place it checks is the controller. If it doesn't find an event there it will check the current route. If it doesn't find one **there** it will check the parent route. And then the parent route of that, if applicable. Eventually it will hit the application route, check that for the action, and if it doesn't find it there will sit down and have a cry. You'll see that in the console and then realise that `updote` is not the correct spelling.
 
-As well as the format `{{action 'actionName'}}` you can also use something called Closure Actions. These are particularly good for components, and we'll refactor to use them later.
+As well as the format `{{action 'actionName'}}` you can also use something called *Closure Actions*. These are particularly good for components, and we'll refactor to use them later.
 
 You'll hopefully have noticed that parameter in our action function, the item parameter. That's being passed through in the action helper in the template up above, and contains the model initially provided by the route. All of the actual changes to the object have been done in the model by editing it in the form, so in this case there's nothing to actually save. The model has already changed. In a real application this would be where those changes were persisted, saving the data back to the API, etc. 
 
@@ -482,23 +482,23 @@ So how do we confirm this stuff? There are a few things we need to verify. The m
 ~~~~~~~~
 test('Creating a new todo item', function(assert) {
    
-    const itemText = 'Some random text';
-    const expectedLength = 5;
+  const itemText = 'Some random text';
+  const expectedLength = 5;
     
-    visit('/todo');
-    click('#new-item-button');
-    fillIn('#new-item-text', itemText);
-    click('#create-item-button');
+  visit('/todo');
+  click('#new-item-button');
+  fillIn('#new-item-text', itemText);
+  click('#create-item-button');
    
-    andThen(function() {
-        let itemList = find('.list-group-item');
-        let itemListLength = itemList.length;
-        let lastItemText = itemList.last().text().trim();
- 
-        assert.equal(expectedLength, itemListLength);
-        assert.equal(itemText, lastItemText);
-        assert.equal(currentURL(), '/todo/'+ itemListLength);
-    });
+  andThen(function() {
+    let itemList = find('.list-group-item');
+    let itemListLength = itemList.length;
+    
+    let lastItemText = itemList.last().text().trim(); 
+    assert.equal(expectedLength, itemListLength);
+    assert.equal(itemText, lastItemText);
+    assert.equal(currentURL(), '/todo/'+ itemListLength);
+  });
 });
 ~~~~~~~~
  
@@ -524,7 +524,7 @@ Before we forget, we need to add a button to create a new item, and we need to p
 
 ~~~~~~~~
 {{#link-to 'todo.new' class="btn btn-info"}}
-    {{fa-icon "plus-circle"}} Add item
+  {{fa-icon "plus-circle"}} Add item
 {{/link-to}}
 ~~~~~~~~
 
@@ -554,9 +554,9 @@ export default Ember.Route.extend({
 
       let collection = this.modelFor('todo');
       let newObject = {
-          id: collection.length+1,
-          text: item.text,
-          checked: false
+        id: collection.length+1,
+        text: item.text,
+        checked: false
       };
       collection.pushObject(newObject);
       this.transitionTo('post.show', newObject);
@@ -584,15 +584,14 @@ And again, this is going to need some thinking through. What we want to do is cl
 ~~~~~~~~
 test('Creating a new todo item', function(assert) {
  
-    visit('/todo');
-    let row = find('li:nth-child(2)');
-    click('.list-group-item:nth-child(2) .check-icon');
+  visit('/todo');
+  let row = find('li:nth-child(2)');
+  click('.list-group-item:nth-child(2) .check-icon');
     
-    andThen(function() {
-        
-        let rowIsChecked = row.hasClass('checked');
-        assert.ok(isRowChecked);
-    });
+  andThen(function() {        
+    let rowIsChecked = row.hasClass('checked');
+    assert.ok(isRowChecked);
+  });
 });
 ~~~~~~~~
 
@@ -605,19 +604,19 @@ This action is surprisingly small. All we really want to do is toggle on and off
 ~~~~~~~
 //app/routes/todo.js
 export default Ember.Route.extend({
-    model(){
-		return [
-			{id: 1, checked: false, text: 'Buy milk'},
-			{id: 2, checked: false, text: 'Buy bread'},
-			{id: 3, checked: false, text: 'Bring back Firefly'},
-			{id: 4, checked: false, text: 'Conquer planet'}
-		];
-	},
-    actions: {
-        checkItem(item){
-            item.set('checked', !item.get('checked'));
-        }
+  model(){
+    return [
+      {id: 1, checked: false, text: 'Buy milk'},
+      {id: 2, checked: false, text: 'Buy bread'},
+      {id: 3, checked: false, text: 'Bring back Firefly'},
+      {id: 4, checked: false, text: 'Conquer planet'}
+    ];
+  },
+  actions: {
+    checkItem(item){
+      item.set('checked', !item.get('checked'));
     }
+  }
 });
 ~~~~~~~
 
@@ -635,25 +634,25 @@ The only other thing to do is add a checkbox with the action and a bit of stylin
 <div class="col-md-4">
 <ul class="list-group">
 {{#each model as |item|}}
-    <li class="list-group-item 
-        {{if item.checked "checked" "unchecked"}}">
-        <span class="check-icon" {{action 'checkItem' item}}>
-            {{fa-icon (if item.checked "check-square-o" "square-o")}}
-        </span>
+  <li class="list-group-item 
+    {{if item.checked "checked" "unchecked"}}">
+    <span class="check-icon" {{action 'checkItem' item}}>
+      {{fa-icon (if item.checked "check-square-o" "square-o")}}
+    </span>
 
-        {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
-        {{#link-to 'todo.edit' item}}
-            {{fa-icon "pencil" class="pull-right edit-link"}}
-        {{/link-to}}
-    </li>
+    {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
+    {{#link-to 'todo.edit' item}}
+      {{fa-icon "pencil" class="pull-right edit-link"}}
+    {{/link-to}}
+  </li>
 {{/each}}
 </ul>
-    {{#link-to 'todo.new' class="btn btn-info"}}
-        {{fa-icon "plus-circle"}} Add item
-    {{/link-to}}
+  {{#link-to 'todo.new' class="btn btn-info"}}
+    {{fa-icon "plus-circle"}} Add item
+  {{/link-to}}
 </div>
 <div class="col-md-4">
-    {{outlet}}
+  {{outlet}}
 </div>
 </div>
 ~~~~~~~

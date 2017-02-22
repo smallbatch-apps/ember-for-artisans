@@ -1,5 +1,5 @@
 
--# A Simple app Extra Credit
+-# A Simple App - Extra Credit
 
 As far as we're concerned, the job is done for the requirements given at the start. This was never intended to be a fully complete application, and a lot of functionality was always intended to be removed to simplify things. Nevertheless, we can take things a few more steps towards completion, and learn some handy stuff.
 
@@ -25,7 +25,7 @@ We can go ahead and make a component the expected way: `ember g component todo-f
 
 That will make two main files. It will create the `app/components/todo-form.js` and `app/templates/components/todo-form.hbs`. The hbs file is obviously the template, while the js file contains primarily any actions and properties of the component.
 
-T> As with route and many other element, generated files can be created with the `--pod` flag to change the structure, in this case to `app/components/todo-form/script.js` and `app/components/todo-form/template.hbs`. I much prefer this format, personally.
+T> As with route and many other element, generated files can be created with the `--pod` flag to change the structure, in this case to `app/components/todo-form/component.js` and `app/components/todo-form/template.hbs`. I much prefer this format, personally.
 
 ## Component templates
 
@@ -48,7 +48,7 @@ Each component makes itself an HTML element when its embedded. By default it wil
 ~~~~~~~~
 <ul class="list-group">
 {{#each model as |item|}}
-	{{todo-item item=item tagName="li" class="list-group-item"}}
+  {{todo-item item=item tagName="li" class="list-group-item"}}
 {{/each}
 </ul>
 ~~~~~~~~
@@ -59,7 +59,7 @@ If you go back to the browser you'll see that the interface still **looks** larg
 
 ~~~~~~~~
 export default Ember.Component.extend({
- isEditing: false
+  isEditing: false
 });
 ~~~~~~~~
 
@@ -67,11 +67,11 @@ Go back into the component's template and we can modify the content to add an if
 
 ~~~~~~~~
 {{#if isEditing}}
-	<!-- edit form goes here -->
-	<!-- formerly in app/templates/todo/edit.hbs -->
+  <!-- edit form goes here -->
+  <!-- formerly in app/templates/todo/edit.hbs -->
 {{else}}
-   <!-- list item content goes here -->
-   <!-- formerly in app/templates/todos.hbs -->
+  <!-- list item content goes here -->
+  <!-- formerly in app/templates/todos.hbs -->
 {{/if}}
 ~~~~~~~~
 
@@ -80,22 +80,24 @@ Again, that should still **look** about right, because the default view is the s
 There are a couple of ways we can handle this, but we'll do it by putting an action call on the div that wraps the icon. So in that all we need to do is write `{{action "enableEditing"}}` and the icon will now function as an action. 
 
 ~~~~~~~~
-<div class="pull-right edit-link" {{action "enableEditing"}}>{{fa-icon "pencil"}}</div>
+<div class="pull-right edit-link" {{action "enableEditing"}}>
+  {{fa-icon "pencil"}}
+</div>
 ~~~~~~~~
 
 We'll need to make that action, and we can do so directly in the component JS. All it needs to do is set `isEditing` to true. While we're there, it makes sense to make a second one that simply does the opposite. We're going to need that sooner rather than later.
 
 ~~~~~~~~
 export default Ember.Component.extend({
- isEditing: false,
- actions: {
- 	enableEditing(){
- 		this.set('isEditing', true);
- 	},
- 	disableEditing(){
- 		this.set('isEditing', false);
- 	}
- }
+  isEditing: false,
+  actions: {
+    enableEditing(){
+      this.set('isEditing', true);
+    },
+    disableEditing(){
+      this.set('isEditing', false);
+    }
+  }
 });
 ~~~~~~~~
 
@@ -120,27 +122,28 @@ If you go to  it will simply do nothing. No error. Our controller has the action
 The issue here is that the component creates its own context. It's triggering the updateItem action **inside the component**, but that doesn't exist, so it blocks the passage of the action. Our component todo-form javascript still needs to handle the action, even if that is just to pass the action through to the controller. Components by their nature need to be passed in anything they need access to, but they also need to pass any action or event back out. So we can actually pass in an action function directly to the component, and then tell it to execute it.
 
 ~~~~~~~~
-{{todo-item item=item tagName="li" class="list-group-item" saveAction=(action "updateItem")}}
+{{todo-item item=item tagName="li" class="list-group-item"
+  saveAction=(action "updateItem")}}
 ~~~~~~~~
 
 We also need to add another simple action in our component javscript, alongside enable and disable of editing. The code is this. We've changed the names of the functions to make it a bit more consistent. 
 
 ~~~~~~~~
-	saveItem(item) {
-		this.set('isEditing', false);
-		this.attrs.saveAction(item);
-	}
+  saveItem(item) {
+    this.set('isEditing', false);
+    this.attrs.saveAction(item);
+  }
 ~~~~~~~~
 
 There's a lot to this. None of it is anywhere nearly as complex as I thought, and as a result I struggled to understand this for some time. I thought there was a lot more *magic* involved than there actually is. For a start, we set the `isEditing` flag to false again to close the form. That bit is fairly obvious.
 
 There are two key things that I think are needed to make it more clear what's happening here. First of all, it's important to really understand what the `action` helper is doing. The action helper simply creates a function from a given string. That string is the name of an action in a given context - in this case the controller. The action helper wraps up that context and creates a function, so that concepts like `this.get` still have meaning. Because it does this, the action helper creates a function that is completely portable and can be passed around and executed from anywhere.
 
-The second thing to understand is that all of the `saveItem` functions are different. There's no inherent magic binding happening here. When we click the action on the "Update" button, it simply executes the component's saveItem function. In that function we are explicitly calling another function. In components, `this.attrs` is the attributes passed in when creating the component. It's a simple map of key/value pairs. You should be able to get `this.attrs.tagName` for example, and see the value 'li'. Which is neither interesting nor useful, but the action we pass in **is** very useful.
+The second thing to understand is that all of the `saveItem` functions are different. There's no inherent magic binding happening here. When we click the action on the "Update" button, it simply executes the component's saveItem function. In that function we are explicitly calling another function. In components, `this.attrs` is the attributes passed in when creating the component. It's a simple map of key/value pairs containing any actions passed in.
 
 In this case, the `saveAction` attribute is a function, and as such it can be directly executed as `this.attrs.saveAction(item)` passing straight through the item given in by the component action call.
 
-T> Note that we're inventing these names, and there's not necessarily any reason to call it `saveAction`, but otherwise we end up with `saveItem=(action "saveItem")` which calls the `saveItem` function which executes `this.attrs.saveItem`, and it gets pretty unclear what comes from where.
+T> We're inventing these names, and there's not necessarily any reason to call it `saveAction`, but otherwise we end up with `saveItem=(action "saveItem")` which calls the `saveItem` function which executes `this.attrs.saveItem`, and it gets pretty unclear what comes from where.
 
 One you fully **get** this it's surprisingly simple and powerful, as we'll see from our next example.
 
@@ -164,51 +167,55 @@ We now need to make the template use this property to determine whether to show 
 
 ~~~~~~~~
 {{#if isEditing}}
-    <div class="form-group">
-      <label for="text">Text</label>
-      {{input value=item.text class="form-control"}}
-    </div>
-    <div class="form-group">
-      <button class="btn btn-info"{{action "saveItem" item}}>{{fa-icon "cloud-upload"}} Update</button>
-    </div>
+  <div class="form-group">
+    <label for="text">Text</label>
+    {{input value=item.text class="form-control"}}
+  </div>
+  <div class="form-group">
+    <button class="btn btn-info"{{action "saveItem" item}}>
+      {{fa-icon "cloud-upload"}} Update
+    </button>
+  </div>
 {{else}}
-    {{#if isNew}}
-        <button class="btn btn-info" {{action 'saveItem'}}>
-            {{fa-icon "plus-circle"}} Add New
-        </button>
-        {{fa-icon "times" action=(action "disableEditing") class="pull-right cancel-edit"}}
-    {{else}}
-        {{fa-icon 
-          (if item.checked "check-square-o" "check-square-o")
-          monospace=true
-          action=(action "checkItem")
-        }}
-        {{/if}}
-        <span class="edit-text {{if item.checked 'checked'}}">{{item.text}}</span>
-	    <span {{action 'enableEditing'}} class="pull-right edit-link">
-            {{fa-icon "pencil"}}
-        </span>
-    {{/if}}
+  {{#if isNew}}
+    <button class="btn btn-info" {{action 'saveItem'}}>
+      {{fa-icon "plus-circle"}} Add New
+    </button>
+    {{fa-icon "times" action=(action "disableEditing") 
+      class="pull-right cancel-edit"}}
+  {{else}}
+    {{fa-icon 
+      (if item.checked "check-square-o" "check-square-o")
+      fixedWidth=true
+      action=(action "checkItem")
+    }}
+    <span class="edit-text {{if item.checked 'checked'}}">{{item.text}}</span>
+    <span {{action 'enableEditing'}} class="pull-right edit-link">
+      {{fa-icon "pencil"}}
+    </span>
+  {{/if}}
 {{/if}}
 ~~~~~~~~
 
-This code has evolved over time, and gotten quite complicated. That's OK, because it's doing quite a lot of things. In particular, we've got a lot of functionality glommed into the actual icons now. Of particular note is the `fa-icon` for the checkbox, which has a lot of properties set, including an inline "if" to determine what to use, the action required, and a monospace option. Monospace here just makes the icon a pre-defined size. The checked and unchecked versions are a slightly different size otherwise, and shift around.
+This code has evolved over time, and gotten quite complicated. That's OK, because it's doing quite a lot of things. In particular, we've got a lot of functionality glommed into the actual icons now. Of particular note is the `fa-icon` for the checkbox, which has a lot of properties set, including an inline "if" to determine what to use, the action required, and a fixedWidth option. The fixedWidth setting here just makes the icon a pre-defined size. The checked and unchecked versions are a slightly different size otherwise, and shift around.
 
 We could do something similar with our pencil icon, putting actions and class on the icon. It could have the same pattern as the checkbox in that respect. Either option is valid. Using both together probably isn't ideal.
 
-T> You'll note a suprising amount of this interface is just turning things on and off. We're trying to keep things nice and explicit here, however there would be an opportunity for a refactor here. Look into the `mut` helper if you're curious. By using something like `{{action (mut "isEditing") true}}` you can actually eliminate the `enableEditing` method and its partner altogether, setting the values directly in the template. 
+T> You'll note a suprising amount of this interface is just turning things on and off. We're trying to keep things nice and explicit here, however there would be an opportunity for a refactor here. Look into the `mut` helper if you're curious. By using something like `{{action (mut isEditing) true}}` you can actually eliminate the `enableEditing` method and its partner altogether, setting the values directly in the template. 
 
 We also need to support our checkItem function in the same was as our saveitem. The implementation of the template is pretty simple, with this block now in `app/templates/todo.hbs`. 
 
 ~~~~~~~~
 <ul class="list-group">
 {{#each model as |item|}}
-	{{todo-form item=item tagName="li" 
-	    class="list-group-item" 
-	    saveAction=(action "updateItem")
-	}}
+  {{todo-form item=item tagName="li" 
+    class="list-group-item" 
+    saveAction=(action "updateItem")
+  }}
 {{/each}
-{{todo-form isNew=true tagName="li" class="list-group-item" saveAction=(action "createItem")}}
+{{todo-form isNew=true tagName="li" class="list-group-item" 
+  saveAction=(action "createItem")
+}}
 </ul>
 ~~~~~~~~
 
@@ -220,24 +227,23 @@ The `app/controllers/todo.js` file should now contain a moderate amount of quite
 
 ~~~~~~~~
 export default Ember.Controller.extend({
-
-	actions: {
-		updateItem(item){
-			alert('item updated');
-		},
-		createItem(item){
-            this.get('model').pushObject({
-                id: collection.length,
-                text: item.text,
-                checked: false
-            });
-			alert('item created');
-        },
-        checkItem(item){
-            item.set('checked', !item.get('checked'));
-            alert('item checked');
-        }
-	}
+  actions: {
+    updateItem(item){
+      alert('item updated');
+    },
+    createItem(item){
+      this.get('model').pushObject({
+        id: collection.length,
+        text: item.text,
+        checked: false
+      });
+      alert('item created');
+    },
+    checkItem(item){
+      item.set('checked', !item.get('checked'));
+      alert('item checked');
+    }
+  }
 });
 ~~~~~~~~
 
@@ -247,29 +253,29 @@ In this case, we end up with our complete component `todo-form.js` file looking 
 
 ~~~~~~~~
 export default Ember.Component.extend({
-    isEditing: false,
-    item: {},
-    actions: {
-        enableEditing(){
-            this.set('isEditing', true);
-        },
-        disableEditing(){
-            this.set('isEditing', false);
-        },
-        saveItem(item){
-            this.set('isEditing', false);
-            // optional: if making a new item, 
-            // blank out the form after saving
-            if(this.attrs.isNew) {
-                this.set('item', {});
-            }
-            this.attrs.saveAction(item);
-        },
-        checkItem(item){
-            item.set('checked', !item.get('checked'));
-            this.attrs.saveItem(item);
-        }
+  isEditing: false,
+  item: {},
+  actions: {
+    enableEditing(){
+      this.set('isEditing', true);
+    },
+    disableEditing(){
+      this.set('isEditing', false);
+    },
+    saveItem(item){
+      this.set('isEditing', false);
+      // optional: if making a new item, 
+      // blank out the form after saving
+      if(this.get('isNew')) {
+        this.set('item', {});
+      }
+      this.attrs.saveAction(item);
+    },
+    checkItem(item){
+      item.set('checked', !item.get('checked'));
+      this.attrs.saveItem(item);
     }
+  }
 });
 ~~~~~~~~
 
@@ -283,14 +289,14 @@ If you go back and run `ember test` you'll notice that it now fails. We've made 
 
 ~~~~~~~~
     //rest of the test   
-    andThen(function() {
-        let itemList = find('.list-group-item');
-        let itemListLength = itemList.length;
-        let lastItemText = itemList.last().text().trim();
+  andThen(function() {
+    let itemList = find('.list-group-item');
+    let itemListLength = itemList.length;
+    let lastItemText = itemList.last().text().trim();
  
-        assert.equal(expectedLength, itemListLength);
-        assert.equal(itemText, lastItemText);
-    });
+    assert.equal(expectedLength, itemListLength);
+    assert.equal(itemText, lastItemText);
+  });
 ~~~~~~~~
 
 # Persisting our data
@@ -307,8 +313,8 @@ By itself that won't do much. We need to define a little bit more structure to m
 
 ~~~~~~~~
 export default DS.Model.extend({
-	text: DS.attr('string'),
-	checked: DS.attr('boolean', {defaultValue: false})
+  text: DS.attr('string'),
+  checked: DS.attr('boolean', {defaultValue: false})
 });
 ~~~~~~~~
 
@@ -320,7 +326,7 @@ The namespace here is DS, rather than the more typical Ember. DS stands for "dat
 
 The type here is optional, and often omitted especially for its default of strings. The object with `defaultValue` is even more often omitted, but sometimes both are handy to make it clear exactly what is intended. In this case we want our tasks to always be false from the start.
 
-T> If you know in advance what you want in an Ember Data model, you can actually add them in the generation command. `ember g model todo text:string checked:boolean:false`.
+T> If you know in advance what you want in an Ember Data model, you can actually add them in the generation command. `ember g model todo text:string checked:boolean`.
 
 ## Adapters
 
@@ -358,6 +364,8 @@ export default LSAdapter.extend({
 });
 ~~~~~~~~
 
+The namespace option here is just used as a key for local storage, but in a more typical server environment it will be something like `api/v1`. It is also very common to have a `host` option in here, which tells Ember where to connect to the API.
+
 ## Serializers
 
 Where the adapter handles how to read the data, serializers handle how to write it. Most often serializers are simple things, just passing through whatever they're sent, but in cases with complex rules or specific requirements they're the place you want to implement those, converting your `firstName` field to the API's required `FIELD_FIRST_NAME` or whatever.
@@ -368,9 +376,10 @@ Serializers are generated the same way as adapters, enough so that I'm not actua
 import LSSerializer from 'ember-localstorage-adapter';
 
 export default LSSerializer.extend({
-  namespace: 'todo-app'
 });
 ~~~~~~~~
+
+You don't need to duplicate the namespace here, Ember knows to re-use the adapter setting.
 
 ## Using Ember Data in our Todo Route
 
@@ -378,13 +387,17 @@ Using Ember Data models in a route is super easy. All we have to do is replace o
 
 ~~~~~~~~
 model() {
-	return this.get('store').findAll('todo');
+  return this.get('store').findAll('todo');
 }
 ~~~~~~~~
 
-This just finds all the todo items which are valid Ember models. This means it gets data from the server (or in this case, local storage pretending to be a server) and returns that. The "store" deserves some discussion. The store in Ember is its local collection of data. The store can also be used to get data from the server, but they're not synonymous. Data can be in the store but not in the server, and vice versa, or it can be in different states in both. A new item, for example, will be added to the store, but must be saved before its available on the server. Ember has special methods for checking **just** the local collection, typically called `peek`, but we're using its `find` methods here, which will check the server, or more accurately the persistence layer.
+This just finds all the todo items which are valid Ember models. This means it gets data from the server (or in this case, local storage pretending to be a server) and returns that. 
 
-Initially no data will be returned, as we haven't made any todo items yet, and we killed our pasted in test ones. Worth mentioning that none of the rest of our code handling these items needs to change. It was always nicely isolated.
+## The "store"
+
+The "store" is easily confused, and so deserves some discussion. The store in Ember is its local collection of data. The store can also be used to get data from the server, but they're not synonymous. Data can be in the store but not in the server, and vice versa, or it can be in different states in both. A new item, for example, will be added to the store, but must be saved before its available on the server. Ember has special methods for checking **just** the local collection, typically called `peek`, but we're using its `find` methods here, which will check the server, or more accurately the persistence layer.
+
+Initially no data will be returned, as we haven't made any todo items yet, and we killed our pasted in test items. Worth mentioning that none of the rest of our code handling these items needs to change. It was always nicely isolated.
 
 T> We don't have our show route for a single todo item any more, but if we did it would have this in its model hook: `return this.store.findRecord('todo', id);`.
 
@@ -398,24 +411,23 @@ The actions we have don't do a lot. All they do is show an alert, which is fine 
 
 ~~~~~~~~
 export default Ember.Controller.extend({
-	actions: {
-		updateItem(item){
-			item.save();
-		},
-		createItem(item){
-            this.get('store').createRecord({
-                text: item.text,
-                checked: false
-            }).save();
-        },
-        checkItem(item){
-            item.set('checked', !item.get('checked'));
-            item.save();
-        }
-	}
+  actions: {
+    updateItem(item){
+      item.save();
+    },
+    createItem(item){
+      this.get('store').createRecord({
+        text: item.text,
+        checked: false
+        }).save();
+    },
+    checkItem(item){
+      item.set('checked', !item.get('checked'));
+      item.save();
+    }
+  }
 });
 ~~~~~~~~
-
 
 You'll probably be noticing at this point how little code is needed here. `item.save()` is a crazy small amount of code to write to persist our data. The only variation is that the `createItem` method doesn't take in a valid model persistable model, but creating a record does, so it's that we save.
 
@@ -446,16 +458,16 @@ Our simple app only has a few routes, so let's do an example of the transition f
 
 ~~~~~~~~
 this.transition(
-    this.fromRoute('about'),
-    this.toRoute('todos'),
-    this.use('toLeft'),
-    this.reverse('toRight')
+  this.fromRoute('about'),
+  this.toRoute('todos'),
+  this.use('toLeft'),
+  this.reverse('toRight')
 );
 ~~~~~~~~
 
 If you look at your application now and click from the about to the index you'll notice... no change. We're missing a step. We need to change the outlet, from Ember's default to the special Liquid Fire one. If you open `app/templates/application.hbs` you can replace the `{{outlet}}` with `{{liquid-outlet}}` and the animations should kick in.
 
-We can now do some more transitions, handling all other route transitions, specifically about to index, and index to todos. As you can imagine, with a large application this could be an extreme number of transitions, as they grow out exponentially. However, there's a handy shortcut we can take. The from **and** to route are both optional, in that you only need one of them. As a result you can simply set one of them when they're on the end of a navigation bar, and greatly simplify the process. In fact all of our route transitions are covered with this:
+We can now do some more transitions, handling all other route transitions, specifically `about` to `index`, and `index` to `todos`. As you can imagine, with a large application this could be an extreme number of transitions, as they grow out exponentially. However, there's a handy shortcut we can take. The from **and** to route are both optional, in that you only need one of them. As a result you can simply set one of them when they're on the end of a navigation bar, and greatly simplify the process. In fact all of our route transitions are covered with this:
 
 ~~~~~~~~
 export default function(){
