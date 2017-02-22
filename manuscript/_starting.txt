@@ -1,5 +1,5 @@
 
--# A simple application in Ember
+-# A Simple Application in Ember
 
 # Getting Started With Ember CLI
 
