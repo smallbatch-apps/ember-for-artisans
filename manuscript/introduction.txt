@@ -10,7 +10,7 @@ If you've run across this and don't actually know Laravel, you don't need to wor
 
 ## A partner to Laravel
 
-I've seen a number of things referred to as the most "Laravel-like" JS framework, but it's hard to quantify that. With Ember, the parallels are strong. Both are highly opinionated MVC frameworks. Both include a comprehensive range of integrated features. Both incorporate a lot of functionality into a CLI utility. Both are inspired by and derived from Rails. Both include comprehensive routers. Both support clear separation of concerns. Both use discrete templates. They have similar attitudes to rational defaults, to convention over configuration, to testing, and to eliminating unnecessary code.
+I've seen a number of things referred to as the most "Laravel-like" JS framework, but it's hard to see how they justify that. With Ember, the parallels are strong. Both are highly opinionated MVC frameworks. Both include a comprehensive range of integrated features. Both incorporate a lot of functionality into a CLI utility. Both are inspired by and derived from Rails. Both include comprehensive routers. They support clear separation of concerns. They both use discrete templates. They both have similar attitudes to rational defaults, to convention over configuration, to testing, and to eliminating unnecessary code.
 
 All the same arguments for Laravel can be made for Ember. An Ember application means treating the frontend with the same respect as the backend, and acknowledging JavaScript as a powerful and capable application platform in its own rights - not just decoration on the backend.
 
