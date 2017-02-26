@@ -74,7 +74,7 @@ In the case of Ember, the Router handles 1, the Route (note the distinction) han
 
 The role of a Route, therefore, is critical in Ember. It sets up everything that comes after. It gets model data, finds the template, and sets up the controller. It's always going to be our first step when adding new features or functionality. In this app we're going to be handling almost all of our code in Routes, and not using a controller at all. There are some complex reasons for this but it shouldn't be taken as any suggestion that there's anything wrong with controllers. They are recommended in a lot of places. The "extra credits" section will refactor some of this code, and **will** actually use a controller as well.
 
-W> If you do a lot of reading you'll quickly learn that Controllers in Ember are deprecated, dead, unnecessary, broken, being replaced or God only knows what else. It's true that a lot of the common use of Controllers is better put elsewhere now, but there is absolutely no intention of making controllers go away. Components take up a lot of their code, but they still have significant value, **especially** in a component heavy app.
+W> If you do a lot of reading you'll quickly learn that Controllers in Ember are deprecated, dead, unnecessary, broken, being replaced or God only knows what else. It's true that a lot of the common use of Controllers is better put elsewhere now, but there is absolutely no intention of making controllers go away. Components take up a lot of their code, but they still have significant value, **especially** in a component-heavy app.
 
 ## Building our first route
 
@@ -88,7 +88,7 @@ You'll see that run through a few lines of output, generating the files we need.
 
 T> You don't actually have to type `generate`, just typing `ember g` will do the same thing with less tapping. We were trying to be explicit, but from now on `ember g` will be used.
 
-If you edit the new `apps/templates/about-us.hbs` you'll see that it's just a blank file. Throw a `<h2>About Us</h2>` at the top. Feel free to put in some lorem ipsum text so you can feel like a real designer, and we'll get on with it. You should also make sure you delete the `{{outlet}}`. We're not going to be putting any sub-routes in here or anything. It won't break anything if you leave it there.
+If you edit the new `apps/templates/about-us.hbs` you'll see that it's mostly just a blank file with an `{{output}}` entry. Throw a `<h2>About Us</h2>` at the top. Feel free to put in some lorem ipsum text so you can feel like a real designer, and we'll get on with it. You should also make sure you delete the `{{outlet}}`. We're not going to be putting any sub-routes in here or anything. It won't break anything if you leave it there.
 
 Going to that route at `http://localhost:4200/about-us` will show us exactly what we would expect to see.
 
@@ -136,7 +136,7 @@ T> There is an alternative structure called "pods", which makes the structure `a
 
 ## Looping over the model
 
-Looping over model data is nice and easy. Ember (like Blade or any other template system) has systems for looping over data. 
+We can now edit the `app/templates/todo.hbs` and put in a loop over the model data we just added. Looping over model data is nice and easy. Ember (like Blade or any other template system) has systems for looping over data. 
 
 ~~~~~~~~
 <h2>My Items</h2>
@@ -245,13 +245,22 @@ Inside that, the show route has a slightly different syntax as well, with an obj
 Rather than typing this URL in to check it, we're going to link to it properly. Edit your `app/templates/todo.hbs` file, go to the loop, and add some links with the link-to helpers. The first argument is again the route. We can link-to a nested route using a dot syntax, in this case `todo.show`. The second argument to the link-to helper we haven't used yet. That lets us pass in the object we're transitioning to. This automatically sets a model for the new route. We'll add some Bootstrap markup at the same time.
 
 ~~~~~~~~
-<ul class="list-group">
-{{#each model as |item|}}
-	<li class="list-group-item">
-        {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
-    </li>
-{{/each}}
-</ul>
+<div class="row">
+  <div class="col-sm-4">
+    <ul class="list-group">
+    {{#each model as |item|}}
+      <li class="list-group-item">
+        {{#link-to 'todo.show' item}}
+          {{item.text}}
+        {{/link-to}}
+      </li>
+    {{/each}}
+    </ul>
+  </div>
+  <div class="col-sm-8">
+    {{outlet}}
+  </div>
+</div>
 ~~~~~~~~
 
 
@@ -261,15 +270,15 @@ We have a template now as part of this generation, and it should be at `app/todo
 
 ~~~~~~~~
 <!-- app/todo/show.hbs -->
-<div class="container">
-	<div class="form-group">
-		<label>Text:</label>
-		<p class="form-control-static">{{model.text}}</p>
-	</div>
-	<div class="form-group">
-		<label>Status:</label>
-		<p class="form-control-static">{{model.checked}}</p>
-	</div>
+<h3>Show Item</h3>
+
+<div class="form-group">
+  <label>Text:</label>
+  <p class="form-control-static">{{model.text}}</p>
+</div>
+<div class="form-group">
+  <label>Status:</label>
+  <p class="form-control-static">{{model.checked}}</p>
 </div>
 ~~~~~~~~
 
@@ -281,9 +290,7 @@ This seems to be working now, but there's a bug in it. If you refresh the page, 
  
 Open your browser debug toolbar with F12 and you'll see a tab for Ember. For the most part that doesn't do anything, but when browsing an Ember app it starts to pop in a bunch of details for us.
  
-Of particular interest to us is the Routes section on the left hand side. If you click on that it will show us the structure of our Ember application's different route paths. In particular, it shows each Route, and what is populating that route. It will show you the application route, and in a higher level the about and todo route, inside which is the todo/show route. It also shows the resources that are used to make this. It will show you which route objects are present, the name, and what url pattern triggers that route. It will also show you what template and what controller are on the route. All of these elements "exist", but some more than others. Every file or object listed here is something that's part of Ember's structure. But if a concrete one is not found, Ember will happily mock one up. For example, there is, and always has been, an application route for your Ember app. It's not at all uncommon to generate a real, concrete route file and put things inside that. We simply don't need that, but you'll notice there **is** an application template, which we made earlier. 
- 
-This is all very interesting, but to get a better idea of our issue here, we need to go to the View Tree tab. This shows the tree and what data it contains. If you click on the first item in our list, and then look down at the Name column where it says `todo.show` you'll see the Model shows a useful object with our text, checked status, etc. However, if you refresh that individual item, and you'll see the model changes to only include an id. And even that is just coming from the URL. 
+To get a better idea of our issue here, we need to go to the View Tree tab. This shows the structure of our application and what data it contains. If you click on the first item in our list, and then look down at the Name column where it says `todo.show` you'll see the Model shows a useful object with our text, checked status, etc. However, if you refresh that individual item, and you'll see the model changes to only include an id. And even that is just coming from the URL. 
 
 This pretty much sums up the problem. This route has no model.
  
@@ -313,7 +320,6 @@ If the `+params.id` part is confusing, it's an unusual but standard syntax. This
 
 T> If you look at the docs for link-to you'll see that it shows the third option as the id, which would make you think you pass in todo.id instead of the whole todo object. Either will work, but they work slightly differently. Passing in the id makes the show route run its own model hook, whereas passing in the object overrides it. In this app it's not noticeably different, but in many larger applications that show route model hook will run an API request. This would make passing in the model significantly faster and cleaner.
 
-
 # Editing
 
 We're going to start off by editing our existing items. It doesn't involve us managing the addition or removal of records, which we'll deal with separately.
@@ -334,24 +340,28 @@ Much like links, inputs are an important part of an Ember app, as they are where
 
 ~~~~~~~~
 <!-- app/todo/edit.hbs -->
-<h3 class="no-top-margin">Update Todo Item</h3>
+<h3>Update Item</h3>
 
 <div class="form-group">
     <label for="text">Text</label>
     {{input value=model.text class="form-control"}}
 </div>
 <div class="form-group">
-    <button class="btn btn-info"{{action "update" model}}>{{fa-icon "cloud-upload"}} Update</button>
+    <button class="btn btn-info"{{action "updateItem" model}}>
+        {{fa-icon "cloud-upload"}} Update
+    </button>
 </div>
 ~~~~~~~~
 
-Again, we'll update the todo loop to provide a link to this new edit route, as well as add some Bootstrap and Font Awesome magic to the interface. The `{{action "update" model}}` part of this is an action helper, telling Ember to run the update function on click (the default), and passing in the model at that time.
+Again, we'll update the todo loop to provide a link to this new edit route, as well as add some Bootstrap and Font Awesome magic to the interface. The `{{action "updateItem" model}}` part of this is an action helper, telling Ember to run the update function on click (the default), and passing in the model at that time.
 
 ~~~~~~~~
 <ul class="list-group">
 {{#each model as |item|}}
     <li class="list-group-item">
-    {{#link-to 'todo.show' item}}{{item.text}}{{/link-to}}
+    {{#link-to 'todo.show' item}}
+      {{item.text}}
+    {{/link-to}}
     {{#link-to 'todo.edit' item}}
         {{fa-icon "pencil" class="pull-right edit-link"}}
     {{/link-to}}
@@ -362,15 +372,11 @@ Again, we'll update the todo loop to provide a link to this new edit route, as w
 
 T> Note the simplicity of the implementation of Font Awesome, thanks to the add-on we installed earlier.
 
-If you edit the details, you'll notice that as you change the details in the field, you also directly change the actual list-item. This is something called "Two-way binding". Two-way binding is a mixed blessing that looks great in a demo, but can cause state conflicts in a larger application. We'll deal with that in a larger application. You'll also notice that when you hit the "Update" button things go very badly wrong. The error says that there is nothing to handle the "update" action, and this is entirely accurate.
+If you edit the details, you'll notice that as you change the details in the field, you also directly change the actual list-item. This is something called "Two-way binding". Two-way binding is a mixed blessing that looks great in a demo, but can cause state conflicts in a larger application. We'll deal with that in a larger application. You'll also notice that when you hit the "Update" button things go very badly wrong. The error says that there is nothing to handle the "updateItem" action, and this is entirely accurate.
 
 ## Actions
 
 Actions in Ember can be handled on a controller (as mentioned before) but in this case we'll handle it on the route, the todo/edit route, specifically. Step one is obviously making that route.
-
-~~~~~~~~
-ember g route todo/edit
-~~~~~~~~
 
 If you open that file at `app/routes/todo/edit.js` you'll see a new route file, roughly the same as our default route, or really anything newly generated in Ember. We need to add an actions object to that route, containing an update function.
 
@@ -382,7 +388,7 @@ export default Ember.Route.extend({
             .find(item => +params.id === item.id);
     },
     actions: {
-        update(item){
+        updateItem(item){
             alert(item.text + ' saved');
         }
     }
@@ -391,21 +397,20 @@ export default Ember.Route.extend({
 
 Actions in Ember aren't always easy to follow, so we'll stop here for a moment and talk about how they work. The use of the action helper - `{{action 'actionName'}}` binds that element to an event. By default this is a click, and so you don't need to explicitly say that. When the event is triggered, Ember looks around for an action to run. It "bubbles" the event up through the application. The first place it checks is the controller. If it doesn't find an event there it will check the current route. If it doesn't find one **there** it will check the parent route. And then the parent route of that, if applicable. Eventually it will hit the application route, check that for the action, and if it doesn't find it there will sit down and have a cry. You'll see that in the console and then realise that `updote` is not the correct spelling.
 
-As well as the format `{{action 'actionName'}}` you can also use something called Closure Actions. These are particularly good for components, and we'll refactor to use them later.
+T> As well as the format `{{action 'actionName'}}` you can also use something called Closure Actions. These are particularly good for components, and we'll refactor to use them later.
 
 You'll hopefully have noticed that parameter in our action function, the item parameter. That's being passed through in the action helper in the template up above, and contains the model initially provided by the route. All of the actual changes to the object have been done in the model by editing it in the form, so in this case there's nothing to actually save. The model has already changed. In a real application this would be where those changes were persisted, saving the data back to the API, etc. 
 
 # Testing in Ember
 
-We want to change direction now. We've just been ripping through this and adding functionality. This is great, but it misses some of the key benefits in Ember. We want to be able to make complex functionality that's tested and maintainable.
+We want to change direction now. We've just been ripping through this and adding functionality. This is great, but it misses some of the key benefits in Ember. We want to be able to make complex functionality that's tested and maintainable. In a small app like this is probably doesn't matter, but in something large in production there's little that matters more.
 
 ## How to run your tests
 
 The simplest way to run your tests is to go to `http://localhost:4200/tests`. This will show a page with all of your tests on it. There are two possibilities at this point. If you've been largely ignoring me, and doing things at your own pace or however you want, everything will be fine, all tests green. If you actually listened and followed the instructions to the letter you have at least one major error you need to fix. There's a life lesson in there.
-
 The error is pretty simple. When we generated the routes earlier, EmberCLI also generated test stubs along with them. The tests that get stubbed are trivial, they just tests that the JavaScript is valid and exists, that there are no lint errors. However, if you recall from earlier, we actually deleted the `about-us` route. It no longer exists. We can get rid of that error by simply deleting the `tests/unit/routes/about-us.js` file. There's no point testing code that doesn't exist. With that file gone, it **should** just test green.
 
-This is the easiest way to test, but it's not the best. The best is to use EmberCLI. We can run the tests by simply running the command `ember test`. There's a fair chance that will get an error, too. It will say something along the lines of "Unable to find PhantomJS". Phantom is a "headless browser". It lets JavaScript execute in a command line, with no interface or display, and shows the results of the page tests, all run in memory. It's not exactly a default install. On a Mac at least it's easy to set up. `brew install phantomjs`
+This is the easiest way to test, but it's not the best. The best is to use EmberCLI. We can run the tests by simply running the command `ember test`. There's a fair chance that will get an error. It will say something along the lines of "Unable to find PhantomJS". Phantom is a "headless browser". It lets JavaScript execute in a command line, with no interface or display, and shows the results of the page tests, all run in memory. It's not exactly a default install. On a Mac at least it's easy to set up. `brew install phantomjs`
 
 With that in place, `ember test` should happily display successful output.
 
@@ -414,12 +419,12 @@ With that in place, `ember test` should happily display successful output.
 For the most part, Ember will generate the tests for you, or at least a test stub. This is a good starting point and saves you from having to do too much work. You also get the benefit that the intial tests in the stub are jslint tests, so if you violate any important JavaScript style rules it will get picked up.
 
 Our application is relatively simple, and most of it is default framework behaviour, which we don't need to test ourselves. There is little complex calculation that could be helped with a unit test. What we actually want to test is our functionality. That when you save, things get added, that kind of thing. We can do that with acceptance tests.
-
-Acceptance tests are essentially tests that confirm the code meets requirements. They don't test **how** it works, just run through the interface and confirm the expected behaviour. Note that this is **behaviour**. We shouldn't be excessively testing display of elements except where user activity is changing it.
  
-# Acceptance Testing
+## Acceptance Testing
  
 Acceptance testing is a sort of automated test specifically about whether the application meets the specifications or requirements. It is fairly typical for an acceptance test to check and confirm the acceptance criteria of the business or client.
+
+They don't test **how** it works, just run through the interface and confirm the expected behaviour. Note that this is **behaviour**. We shouldn't be excessively testing display of elements except where user activity is changing it.
  
 Unlike unit tests, which intend to test tiny pieces of the site in great detail while isolated, acceptance tests are for broad, actual user-style functionality. An acceptance test might check, for example, that a user can log in, or that a signup form works, or that a product can be added to the cart, and then checkout completed.
  
@@ -434,7 +439,6 @@ We can add a second test here, just to confirm that the title is what you think.
 ~~~~~~~~
 test('heading for /about-us page', function(assert) {
   const expectedHeading = 'About Us'; 
-
   visit('/about-us');
   
   andThen(function() {
@@ -523,7 +527,7 @@ We can grab the exact same form details, copying the entire of `edit.hbs` and pa
 Before we forget, we need to add a button to create a new item, and we need to put it into `app/templates/todo.hbs`. Under the list you can just put the following line to get a nicely styled button.
 
 ~~~~~~~~
-{{#link-to 'todo.new' class="btn btn-info"}}
+{{#link-to 'todo.new' class="btn btn-info" id="new-item-button"}}
     {{fa-icon "plus-circle"}} Add item
 {{/link-to}}
 ~~~~~~~~
@@ -550,7 +554,7 @@ export default Ember.Route.extend({
     return {};
   },
   actions: {
-    create(item){
+    createItem(item){
 
       let collection = this.modelFor('todo');
       let newObject = {
@@ -559,7 +563,7 @@ export default Ember.Route.extend({
           checked: false
       };
       collection.pushObject(newObject);
-      this.transitionTo('post.show', newObject);
+      this.transitionTo('todo.show', newObject);
     }
   }
 });
@@ -569,7 +573,9 @@ A lot of that should be easy to follow. The actions object contains a single cre
 
 The collection of all the different todo items is the model for the todo route, so we grab that. It's simply the easiest thing to do, and to be honest it most clearly reflects the intent here. This is an Ember Collection object, so we use the `pushObject` method to add a new item to it. It seems like we could just use the standard array push, but pushObject respects all the watchers and magic of Ember, making it immediately just as usable as any other item in our collection. Again, it would be typical to persist this new item back to the server as well, but a step not being taken by our demo application. Then we just redirect to the page for that item.
 
-If we run our `ember test` command again we will notice that the test now successfully passes. Congratulations, you are now an expert at  **BDD** and can put it on your resume.
+For the most part, the template here will be the same as the edit template, so grab that from `app/templates/todo/edit.hbs` and copy it to `app/templates/todo/new.hbs`. We'll need to make some changes for it to match the test. You need to add an id to elements, the new item button on the todo.hbs needs the id of "new-item-button" as given in the text, the input given "new-item-text", and the new.hbs button the id of "create-item-button".
+
+If we run our `ember test` command again we will notice that the test now successfully passes. Congratulations, you are now an expert at  **BDD** and can put it on your resume. 
 
 # Checking an item
 
@@ -582,16 +588,14 @@ Again, we're going to BDD this, so let's start with `ember g acceptance-test tod
 And again, this is going to need some thinking through. What we want to do is click the **second** checkbox, and then confirm that the item is crossed out. This should be enough to confirm that our behaviour is as expected.
 
 ~~~~~~~~
-test('Creating a new todo item', function(assert) {
- 
+test('Checking a new todo item', function(assert) {
     visit('/todo');
-    let row = find('li:nth-child(2)');
     click('.list-group-item:nth-child(2) .check-icon');
     
     andThen(function() {
-        
+        let row = find('li:nth-child(2)');
         let rowIsChecked = row.hasClass('checked');
-        assert.ok(isRowChecked);
+        assert.ok(rowIsChecked);
     });
 });
 ~~~~~~~~
@@ -615,7 +619,7 @@ export default Ember.Route.extend({
 	},
     actions: {
         checkItem(item){
-            item.set('checked', !item.get('checked'));
+            Ember.set(item, 'checked', !Ember.get(item, 'checked'));
         }
     }
 });

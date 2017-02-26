@@ -11,6 +11,8 @@ Most JavaScript frameworks are based nearly completely on components. Their rout
 
 Our routes and templates for todo items are a bit messy. Let's be honest, no one is going to use a todo list like this. They're going to want editing to be in-place. They're not going to ever want to go to the "page" for an item. And we have todo-related stuff scattered through several routes. It would be nice to be able to move that stuff out and make it all neater. Components allow us to do that, making self-contained elements. Components can be as small as a button, or as large as a whole form or page.
 
+This section may get slightly complicated. This is because we're "double handling" so much functionality, having made the route-based application and then refactored. Had we started off with this better component structure, things would seem much smoother.
+
 Components are something I struggled to "get" for a long time. The best way to think of them is as a custom HTML element. There is a lot of behaviour in a HTML element such as a text input. It needs to support placeholders, that are grey and vanish if your type something else. They need to support things like max size, rejecting invalid input, handle options such as pattern. The browser does all this without your help. But they're necessarily generic. Components let you make html-like-elements that are specific to your application.
 
 T> For the record, you've actually already used components. The Link-to helper is actually a component for dealing with links, and the Font Awesome add-on gives us the `{{fa-icon}}` component. 
@@ -48,7 +50,7 @@ Each component makes itself an HTML element when its embedded. By default it wil
 ~~~~~~~~
 <ul class="list-group">
 {{#each model as |item|}}
-	{{todo-item item=item tagName="li" class="list-group-item"}}
+  {{todo-item item=item tagName="li" class="list-group-item"}}
 {{/each}
 </ul>
 ~~~~~~~~
@@ -59,7 +61,7 @@ If you go back to the browser you'll see that the interface still **looks** larg
 
 ~~~~~~~~
 export default Ember.Component.extend({
- isEditing: false
+  isEditing: false
 });
 ~~~~~~~~
 
@@ -113,32 +115,66 @@ Thankfully there **is** a better way. We will start off by creating a controller
 ember g controller todo
 ~~~~~~~~
 
-We still need to handle the actual update function, but that's easy, just move it over from the `app/routes/todo/edit.js` into `app/controllers/todo.js` controller and it should be fine. In fact you can delete that edit route once you nab its action. We also need to make sure we remove the entry from the router. It's worth noting that we're consolidating down a lot of flexibility here, which should really clean up our code. The `app/controllers/todo.js` file will contain nearly all of our actions and functionality, while the components themselves handle their own state.
+We still need to handle the actual update function, but that's easy, just move the entire actions object over from the `app/routes/todo/edit.js` into `app/controllers/todo.js` controller and it should be fine. In fact you can delete that edit route once you nab its action. We also need to make sure we remove the entry from the router. 
 
-If you go to  it will simply do nothing. No error. Our controller has the action, but our component doesn't register it. We talked a little earlier about the "context" being the controller and the template together. 
+We're consolidating down a lot of flexibility here, which should really clean up our code. The `app/controllers/todo.js` file will contain nearly all of our actions and functionality, while the components themselves handle their own state. This means very shortly we can delete everything in our `app/templates/todo` and `app/routes/todo` folders, as well as removing the routes from the router.
 
-The issue here is that the component creates its own context. It's triggering the updateItem action **inside the component**, but that doesn't exist, so it blocks the passage of the action. Our component todo-form javascript still needs to handle the action, even if that is just to pass the action through to the controller. Components by their nature need to be passed in anything they need access to, but they also need to pass any action or event back out. So we can actually pass in an action function directly to the component, and then tell it to execute it.
+First, though, we need to make some template changes. For a start, the `model` we were using was coming through from the route. We no longer have that, we have the `item`. We could have actually passed in `model=item` and not changed our code, but it's a bit misleading, because it's not really a model.
 
-~~~~~~~~
-{{todo-item item=item tagName="li" class="list-group-item" saveAction=(action "updateItem")}}
-~~~~~~~~
-
-We also need to add another simple action in our component javscript, alongside enable and disable of editing. The code is this. We've changed the names of the functions to make it a bit more consistent. 
+We need to go through and find the places we've used model, in both the form and list item display. This should be the complete template, with a few minor changes for readabiliy.
 
 ~~~~~~~~
-	saveItem(item) {
-		this.set('isEditing', false);
-		this.attrs.saveAction(item);
-	}
+{{#if isEditing}}
+<div class="form-group">
+  <label for="text">Text</label>
+  {{input value=item.text class="form-control"}}
+</div>
+<div class="form-group">
+  <button class="btn btn-info"{{action "saveItem" item}}>
+    {{fa-icon "cloud-upload"}} Save
+  </button>
+  <span class="pull-right"{{action 'disableEditing'}}>
+    {{fa-icon 'times'}}
+  </span>
+</div>
+{{else}}
+<span class="check-icon" {{action 'checkItem' item}}>
+  {{fa-icon (if item.checked "check-square-o" "square-o")}}
+</span>
+<span class="item-text">{{item.text}}</span>
+<span {{action 'enableEditing'}}>
+  {{fa-icon "pencil" class="pull-right edit-link"}}
+</span>
+{{/if}}
+~~~~~~~~
+
+We've also removed the link to the `show` route, as it doesn't make a lot of sense anymore, so we can completely remove that `show` route and template as well. We can also copy over the route actions from `apps/routes/todo.js` and `apps/routes/todo/new.js`, and put them into the controller actions. We'll link them up soon.
+
+Our functionality still doesn't work. If we save the the item we get an error. Our controller has the action, but our component doesn't have anything to handle it. We talked a little earlier about the "context" being the controller and the template together.
+
+The issue here is that the component creates its own context. It's triggering the saveItem action **inside the component**, but that doesn't exist, so it blocks the passage of the action. Our component's todo-form JavaScript still needs to handle the action, even if that is just to pass the action through to the controller. Components by their nature need to be passed in anything they need access to, but they also need to pass any action or event back out. So we can actually pass in an action function directly to the component, and then tell it to execute it. It needs to be restated that we're literally passing in the function itself here as a closure.
+
+~~~~~~~~
+{{todo-item item=item tagName="li" class="list-group-item" 
+  saveAction=(action "updateItem")}}
+~~~~~~~~
+
+We also need to add another simple action in our component `todo-form.js`, alongside enable and disable of editing. The code is this. 
+
+~~~~~~~~
+  saveItem(item) {
+    this.set('isEditing', false);
+    this.attrs.saveAction(item);
+  }
 ~~~~~~~~
 
 There's a lot to this. None of it is anywhere nearly as complex as I thought, and as a result I struggled to understand this for some time. I thought there was a lot more *magic* involved than there actually is. For a start, we set the `isEditing` flag to false again to close the form. That bit is fairly obvious.
 
-There are two key things that I think are needed to make it more clear what's happening here. First of all, it's important to really understand what the `action` helper is doing. The action helper simply creates a function from a given string. That string is the name of an action in a given context - in this case the controller. The action helper wraps up that context and creates a function, so that concepts like `this.get` still have meaning. Because it does this, the action helper creates a function that is completely portable and can be passed around and executed from anywhere.
+There are two key things that I think are needed to make it more clear what's happening here. First of all, it's important to really understand what the `action` helper is doing. The action helper simply creates a function from a given string. That string is the name of an action in a given context - in this case the controller. The action helper wraps up that context and creates a function, so that concepts like `this.get` still have meaning. Because it does this, the action helper creates a function that is completely portable and can be passed around and executed from anywhere. This context (and thus this function) are created in the template, when we pass in that action as the `saveAction`.
 
-The second thing to understand is that all of the `saveItem` functions are different. There's no inherent magic binding happening here. When we click the action on the "Update" button, it simply executes the component's saveItem function. In that function we are explicitly calling another function. In components, `this.attrs` is the attributes passed in when creating the component. It's a simple map of key/value pairs. You should be able to get `this.attrs.tagName` for example, and see the value 'li'. Which is neither interesting nor useful, but the action we pass in **is** very useful.
+The second thing to understand is that all of the `saveItem` and `updateItem` functions are different and are not really connected. There's no inherent magic binding happening here. When we click the action on the "Update" button, it simply executes the component's saveItem action. In that function we are explicitly calling another function. In components, `this.attrs` is the attributes passed in when creating the component, specifically it includes the actions.
 
-In this case, the `saveAction` attribute is a function, and as such it can be directly executed as `this.attrs.saveAction(item)` passing straight through the item given in by the component action call.
+In this case, the `saveAction` attribute is a function, and as such it can be directly executed as `this.attrs.saveAction(item)` passing straight through the closure given in by the component action call.
 
 T> Note that we're inventing these names, and there's not necessarily any reason to call it `saveAction`, but otherwise we end up with `saveItem=(action "saveItem")` which calls the `saveItem` function which executes `this.attrs.saveItem`, and it gets pretty unclear what comes from where.
 
@@ -148,7 +184,7 @@ One you fully **get** this it's surprisingly simple and powerful, as we'll see f
 
 It might seem like the obvious solution is to make another component to form the "new" interface. But in truth, we already have the component we need. We can just re-use the `todo-form` component.
 
-Again, we've got some actions in a route that we want to have in the controller, in particular, `create`. We'll rename it `createItem` here, just to be more explicit and in line with other functions. Unfortunately, the action here is going to need quite a bit of refactoring. TODO
+Again, we've got some actions in a route that we want to have in the controller, in particular, `createItem`. We'll rename it `createItem` here, just to be more explicit and in line with other functions. Unfortunately, the action here is going to need quite a bit of refactoring.
 
 Because we're just reusing our editing component we end up with an `isEditing` property. That's not the most ideal terminology, but it's clear what it means, so we'll just use it as-is.
 
@@ -164,51 +200,60 @@ We now need to make the template use this property to determine whether to show 
 
 ~~~~~~~~
 {{#if isEditing}}
-    <div class="form-group">
-      <label for="text">Text</label>
-      {{input value=item.text class="form-control"}}
-    </div>
-    <div class="form-group">
-      <button class="btn btn-info"{{action "saveItem" item}}>{{fa-icon "cloud-upload"}} Update</button>
-    </div>
+<div class="form-group">
+  <label for="text">Text</label>
+  {{input value=item.text class="form-control"}}
+</div>
+<div class="form-group">
+  <button class="btn btn-info"{{action "saveItem" item}}>
+    {{fa-icon "cloud-upload"}} Save
+  </button>
+  <span class="pull-right"{{action 'disableEditing'}}>
+    {{fa-icon 'times'}}
+  </span>
+</div>
 {{else}}
-    {{#if isNew}}
-        <button class="btn btn-info" {{action 'saveItem'}}>
-            {{fa-icon "plus-circle"}} Add New
-        </button>
-        {{fa-icon "times" action=(action "disableEditing") class="pull-right cancel-edit"}}
-    {{else}}
-        {{fa-icon 
-          (if item.checked "check-square-o" "check-square-o")
-          monospace=true
-          action=(action "checkItem")
-        }}
-        {{/if}}
-        <span class="edit-text {{if item.checked 'checked'}}">{{item.text}}</span>
-	    <span {{action 'enableEditing'}} class="pull-right edit-link">
-            {{fa-icon "pencil"}}
-        </span>
-    {{/if}}
+  {{#if isNew}}
+    <button class="btn btn-info" {{action 'saveItem'}}>
+      {{fa-icon "plus-circle"}} Add New
+    </button>
+    {{fa-icon "times" action=(action "disableEditing") 
+      class="pull-right cancel-edit"}}
+  {{else}}
+    {{fa-icon 
+      (if item.checked "check-square-o" "check-square-o")
+      fixedWidth=true
+    }}
+    <span class="edit-text {{if item.checked 'checked'}}">
+      {{item.text}}
+    </span>
+    <span {{action 'enableEditing'}} class="pull-right edit-link">
+      {{fa-icon "pencil"}}
+    </span>
+  {{/if}}
 {{/if}}
 ~~~~~~~~
 
-This code has evolved over time, and gotten quite complicated. That's OK, because it's doing quite a lot of things. In particular, we've got a lot of functionality glommed into the actual icons now. Of particular note is the `fa-icon` for the checkbox, which has a lot of properties set, including an inline "if" to determine what to use, the action required, and a monospace option. Monospace here just makes the icon a pre-defined size. The checked and unchecked versions are a slightly different size otherwise, and shift around.
+This code has evolved over time, and gotten quite complicated. That's OK, because it's doing quite a lot of different things. Most particularly, you'll notice that inside the `else` section of the `isEditing` conditional we have another conditional checking for `isNew`, and showing the button from our `app/templates/todo.hbs` file, or the normal item display.
+
+Additionally, we've got a lot of functionality glommed into the actual icons now. Of particular note is the `fa-icon` for the checkbox, which has a lot of properties set, including an inline "if" to determine what to use, and a fixedWidth option. fixedWidth here just makes the icon a pre-defined size. The checked and unchecked versions are a slightly different size otherwise, and shift around. We'll also end up putting an action on that, but we stripped it off temporarily, because we haven't implemented the `checkItem` functionality in the component yet, and it would throw errors.
 
 We could do something similar with our pencil icon, putting actions and class on the icon. It could have the same pattern as the checkbox in that respect. Either option is valid. Using both together probably isn't ideal.
 
 T> You'll note a suprising amount of this interface is just turning things on and off. We're trying to keep things nice and explicit here, however there would be an opportunity for a refactor here. Look into the `mut` helper if you're curious. By using something like `{{action (mut "isEditing") true}}` you can actually eliminate the `enableEditing` method and its partner altogether, setting the values directly in the template. 
 
-We also need to support our checkItem function in the same was as our saveitem. The implementation of the template is pretty simple, with this block now in `app/templates/todo.hbs`. 
+We also need to support our checkItem function in the same was as our saveItem. The implementation of the template is pretty simple, with this block now in `app/templates/todo.hbs`. 
 
 ~~~~~~~~
 <ul class="list-group">
 {{#each model as |item|}}
-	{{todo-form item=item tagName="li" 
-	    class="list-group-item" 
-	    saveAction=(action "updateItem")
-	}}
+  {{todo-form item=item tagName="li" 
+    class="list-group-item" 
+    saveAction=(action "updateItem")
+  }}
 {{/each}
-{{todo-form isNew=true tagName="li" class="list-group-item" saveAction=(action "createItem")}}
+{{todo-form isNew=true tagName="li" class="list-group-item" 
+  saveAction=(action "createItem")}}
 </ul>
 ~~~~~~~~
 
