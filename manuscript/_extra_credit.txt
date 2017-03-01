@@ -502,7 +502,7 @@ We can fix the new item test most easily. The only change is that instead of a f
 const expectedLength = find('.list-group-item .item-text').length + 1;
 ~~~~~~~~
 
-The check item test is slightly more complicatd. Because we are using local storage, and the test process is clearing that automatically, we start each test run with no items. The easiest solution to this is to simply make one, then check it, giving the following test, largely stolen from the new item test.
+The check item test is slightly more complicated. Because we are using local storage, and the test process is clearing that automatically, we start each test run with no items. The easiest solution to this is to simply make one, then check it, giving the following test, largely stolen from the new item test.
 
 ~~~~~~~~
 test('Checking a todo item', function(assert) {
@@ -581,7 +581,7 @@ export default function(){
 
 These transitions may look backwards. We're actually animating how we want the animation to occur, so where the old outlet contents should go. It's easy to assume this is that we want the new item to appear "to the right". Actually, we want the whole section to slide left, bringing the new content in at the right.
 
-Outlet transitions aren't the only place we can benefit from Liquid Fire, nor the only way to use it. We can also use liquid versions of other helpers. Usefully, we can replace our todo-form component `{{if isEditing}}` with a `liquid-if`. In principle we could add this to `transitions.js`, but there's a nicer way. We can add our animation directly onto the the `liquid-if`. The simplest way to do this is to set a "use" attribute. That's the way to set what animation to use in the transition. It's not well documented (if at all) but you can also set a reverse animation. This makes it possible to do something like `{{if isEditing use="toUp" reverse="toDown"}}`. This is a quite effective look, and crossFade works well too. Most interestingly, just leaving a `liquid-if` without any animation at all causes a slight slide effect, which looks better than a standard `if`, which just flicks in and out.
+Outlet transitions aren't the only place we can benefit from Liquid Fire, nor the only way to use it. We can also use liquid versions of other helpers. Usefully, we can replace our todo-form component `{{if isEditing}}` with a `liquid-if`. In principle we could add this to `transitions.js`, but there's a nicer way. We can add our animation directly onto the the `liquid-if`. The simplest way to do this is to set a "use" attribute. That's the way to ƒset what animation to use in the transition. It's not well documented (if at all) but you can also set a reverse animation. This makes it possible to do something like `{{if isEditing use="toUp" reverse="toDown"}}`. This is a quite effective look, and crossFade works well too. Most interestingly, just leaving a `liquid-if` without any animation at all causes a slight slide effect, which looks better than a standard `if`, which just flicks in and out.
 
 We could also replace the `if` on our checkbox, to make it crossFade or something like that. But in this case it looks better without it. It's mimicking a checkbox, which a user would expect to be instant.
 

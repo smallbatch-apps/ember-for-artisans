@@ -132,7 +132,7 @@ If you're paying attention, you'll notice that the Route object contains the mod
 
 T> There is an alternative structure called "pods", which makes the structure `app/todo/template.hbs` and `app/todo/route.js`, which for many people and in many cases is clearer. There's no "correct" approach, and they can be used interchangeably by simply generating with the `--pod` flag. For example, `ember g route todo --pod`.
 
-# Working With Templates
+# Working with templates
 
 ## Looping over the model
 
@@ -226,7 +226,7 @@ Installing this lets you replace the `li`, **not the link-to** with an active-aw
 
 Click around and the problem is fixed. Nice and simple. 
 
-# Nested Routes
+# Nested routes
 
 ## How to show a single item
 
@@ -401,7 +401,7 @@ T> As well as the format `{{action 'actionName'}}` you can also use something ca
 
 You'll hopefully have noticed that parameter in our action function, the item parameter. That's being passed through in the action helper in the template up above, and contains the model initially provided by the route. All of the actual changes to the object have been done in the model by editing it in the form, so in this case there's nothing to actually save. The model has already changed. In a real application this would be where those changes were persisted, saving the data back to the API, etc. 
 
-# Testing In Ember
+# Testing in Ember
 
 We want to change direction now. We've just been ripping through this and adding functionality. This is great, but it misses some of the key benefits in Ember. We want to be able to make complex functionality that's tested and maintainable. In a small app like this is probably doesn't matter, but in something large in production there's little that matters more.
 
@@ -420,7 +420,7 @@ For the most part, Ember will generate the tests for you, or at least a test stu
 
 Our application is relatively simple, and most of it is default framework behaviour, which we don't need to test ourselves. There is little complex calculation that could be helped with a unit test. What we actually want to test is our functionality. That when you save, things get added, that kind of thing. We can do that with acceptance tests.
  
-## Acceptance Testing
+## Acceptance testing
  
 Acceptance testing is a sort of automated test specifically about whether the application meets the specifications or requirements. It is fairly typical for an acceptance test to check and confirm the acceptance criteria of the business or client.
 
@@ -512,7 +512,7 @@ T> If you're thinking that littering your tests with selectors is a bad practise
 
 When you run this test you'll notice something else. It fails. This is the plan. This is the point of this kind of testing. Write a failing test first, then make it not fail. When it doesn't fail, the feature is working. This is Behaviour Driven Development.
 
-# Creating a New Item
+# Creating a new item
 
 The new item is slightly more complex because it affects the collection as well as requiring the generation of a new object. It's not much more so, and certainly starts off the same.
 
@@ -578,7 +578,7 @@ For the most part, the template here will be the same as the edit template, so g
 
 If we run our `ember test` command again we will notice that the test now successfully passes. Congratulations, you are now an expert at  **BDD** and can put it on your resume. 
 
-# Checking an Item
+# Checking an item
 
 There's only one real requirement left. A todo list that can't check off items is in poor shape. We need to add that functionality. The first step is to figure out whose responsibility this is. It might be initially tempting to assume this is the responsibility of the edit route, but remember, from an interface point of view we really just want to handle this directly in the todos listing view, not go somewhere else to do it. 
 
