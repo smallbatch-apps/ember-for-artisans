@@ -185,6 +185,8 @@ We can provide a number of arguments to this thing, but the basic usage is a sin
 {{outlet}}
 ~~~~~~~~
 
+![Now with added navigation menu](images/06-add-menu.png)
+
 ## Understanding outlets
 
 Clicking between these is now handled as a transition inside the app. You'll note that the URL changes, but the interface doesn't really move around, as only the content of the `{{outlet}}` is changing. It's hard to really tell on such a simple site. This is now legitimately a single page app. It might not do much yet, but it really hasn't taken a lot of effort to make it go, either. Ember is dedicated to making Single Page Apps quick and easy to produce.
@@ -238,6 +240,8 @@ Installing this lets you replace the `li`, **not the link-to** with an active-aw
 
 Click around and the problem is fixed. Nice and simple. 
 
+![A proper Bootstrap menu in place](images/07-menu-fixed.png)
+
 # Nested routes
 
 ## How to show a single item
@@ -278,7 +282,7 @@ Rather than typing this URL in to check it, we're going to link to it properly. 
 
 ## The template for a single item
 
-We have a template now as part of this generation, and it should be at `app/todo/show.hbs`. All we really need is some basic layout in this and we'll be good to go. Note that the model for a single todo will be a todo item, rather than the collection we used in the parent route. That's what we passed in at the end of the link-to. Obviously 
+We have a template now as part of this generation, and it should be at `app/todo/show.hbs`. All we really need is some basic layout in this and we'll be good to go. Note that the model for a single todo will be a todo item, rather than the collection we used in the parent route. That's what we passed in at the end of the link-to. 
 
 ~~~~~~~~
 <!-- app/todo/show.hbs -->
@@ -296,13 +300,19 @@ We have a template now as part of this generation, and it should be at `app/todo
 
 Now you can go to the application, and click through to the Todo page, then click on any of the individual items to view its details.
 
+!["Show Item" heading missing from this screenshot](images/08-single-route.png)
+
 ## Debugging with the Ember Inspector
  
 This seems to be working now, but there's a bug in it. If you refresh the page, you'll see our todo item's text field gets wiped. Each URL should work on its own merits. It's a URL and a perfectly valid one, so this isn't the behaviour we want. I suggested earlier that you install the Ember Inspector extension for whatever browser you use, and am now going to assume you did so. We can use Ember Inspector to give us a bit more of an idea of what's happening with this code.
  
 Open your browser debug toolbar with F12 and you'll see a tab for Ember. For the most part that doesn't do anything, but when browsing an Ember app it starts to pop in a bunch of details for us.
 
-To get a better idea of our issue here, we need to go to the View Tree tab. This shows the structure of our application and what data it contains. If you click on the first item in our list, and then look down at the Name column where it says `todo.show` you'll see the Model shows a useful object with our text, checked status, etc. However, if you refresh that individual item, and you'll see the model changes to only include an id. And even that is just coming from the URL. 
+To get a better idea of our issue here, we need to go to the View Tree tab. 
+
+![The structure of an Ember app - note the empty model object](images/09-ember-inspector.png)
+
+This shows the structure of our application and what data it contains. If you click on the first item in our list, and then look down at the Name column where it says `todo.show` you'll see the Model shows a useful object with our text, checked status, etc. However, if you refresh that individual item, and you'll see the model changes to only include an id. And even that is just coming from the URL. 
 
 This pretty much sums up the problem. This route has no actual model.
  
@@ -331,6 +341,8 @@ return this.modelFor('todo')
 If the `+params.id` part is confusing, it's an unusual but standard syntax. This isn't Ember, it's just a JavaScript unary operator.
 
 T> If you look at the docs for link-to you'll see that it shows the third option as the id, which would make you think you pass in todo.id instead of the whole todo object. Either will work, but they work slightly differently. Passing in the id makes the show route run its own model hook, whereas passing in the object overrides it. In this app it's not noticeably different, but in many larger applications that `todo.show` route's model hook will run an API request. This would make passing in the model significantly faster and cleaner.
+
+![Note the correct objects in the Model](images/10-ember-inspector-fixed.png)
 
 # Editing
 
@@ -382,6 +394,8 @@ Again, we'll update the todo loop to provide a link to this new edit route, as w
 
 T> Note the simplicity of the implementation of Font Awesome, thanks to the add-on we installed earlier.
 
+![The edit route when active](images/11-edit-route.png)
+
 If you edit the details, you'll notice that as you change the details in the field, you also directly change the actual list-item. This is something called "Two-way binding". Two-way binding is a mixed blessing that looks great in a demo, but can cause state conflicts in a larger application. We'll deal with that in a larger application. You'll also notice that when you hit the "Update" button things go very badly wrong. The error says that there is nothing to handle the "updateItem" action, and this is entirely accurate.
 
 ## Actions
@@ -420,11 +434,16 @@ We want to change direction now. We've just been ripping through this and adding
 ## How to run your tests
 
 The simplest way to run your tests is to go to `http://localhost:4200/tests`. This will show a page with all of your tests on it. There are two possibilities at this point. If you've been largely ignoring me, and doing things at your own pace or however you want, everything will be fine, all tests green. If you actually listened and followed the instructions to the letter you have at least one major error you need to fix. There's a life lesson in there.
+
+![The Ember test page](images/12-test-page.png)
+
 The error is pretty simple. When we generated the routes earlier, EmberCLI also generated test stubs along with them. The tests that get stubbed are trivial, they just tests that the JavaScript is valid and exists, that there are no lint errors. However, if you recall from earlier, we actually deleted the `about-us` route. It no longer exists. We can get rid of that error by simply deleting the `tests/unit/routes/about-us.js` file. There's no point testing code that doesn't exist. With that file gone, it **should** just test green.
 
 This is the easiest way to test, but it's not the best. The best is to use EmberCLI. We can run the tests by simply running the command `ember test`. There's a fair chance that will get an error. It will say something along the lines of "Unable to find PhantomJS". Phantom is a "headless browser". It lets JavaScript execute in a command line, with no interface or display, and shows the results of the page tests, all run in memory. It's not exactly a default install. On a Mac at least it's easy to set up. `brew install phantomjs`
 
 With that in place, `ember test` should happily display successful output.
+
+![The output of a successful "ember test" command](images/13-testing-pass.png)
 
 ## How to write tests
 
@@ -588,6 +607,8 @@ The collection of all the different todo items is the model for the todo route, 
 
 For the most part, the template here will be the same as the edit template, so grab that from `app/templates/todo/edit.hbs` and copy it to `app/templates/todo/new.hbs`. We'll need to make some changes for it to match the test. You need to add an id to elements, the new item button on the todo.hbs needs the id of "new-item-button" as given in the text, the input given "new-item-text", and the new.hbs button the id of "create-item-button".
 
+![Our list now has an add button](images/14-listing-with-add.png)
+
 If we run our `ember test` command again we will notice that the test now successfully passes. Congratulations, you are now an expert at  **BDD** and can put it on your resume. 
 
 # Checking an item
@@ -676,6 +697,8 @@ The only other thing to do is add a checkbox with the action and a bit of stylin
 </div>
 ~~~~~~~
 
+![Checkbox now in place](images/15-listing-with-checkbox.png)
+
 The new code is mostly in the span that we've thrown an action on and put an icon inside. A conditional `if` as the second parameter tells it whether to have the icon checked or unchecked. Similar code exists above and tells the class whether to be checked or unchecked so our styling will work.
 
 If we run `ember test` we get the confirmation that we've met our requirement.
@@ -704,6 +727,8 @@ li:hover .edit-link {
 ~~~~~~~~
 
 Most of it is just polish so that we don't see the edit icons unless we mouseover the list item, and the second rule is to make checked items have a strikethrough effect.
+
+![A finished app, for now](images/16-listing-with-styles.png)
 
 This doesn't just have to be CSS. If you're wanting to use Sass, and you should, it's trivial to set up. Just install `ember install ember-cli-sass` and you can just rename `app/styles/app.css` to `app/styles/app.scss`, or create a new one. 
 
