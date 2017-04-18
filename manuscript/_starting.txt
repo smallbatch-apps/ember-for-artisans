@@ -13,6 +13,8 @@ Step one of starting with Ember is to install Ember CLI globally to your system.
 npm install -g ember-cli
 ~~~~~~~~
 
+![Ember CLI's website gives clear instructions](images/00-embercli.png)
+
 Ember CLI is a pretty solid comparision to Laravel's artisan command line tool in that it has generators and so on, but it packs a lot more punch. Basically if there is stuff you don't want to do - dependency management, setting up task runners, installing addons, etc, Ember CLI will take it off your hands. First among these is scaffolding an entire new application.
 
 ~~~~~~~~
@@ -29,11 +31,15 @@ T> You should really install the Chrome addon called Ember Inspector. It does a 
 
 If you go to the URL that `ember server` gave you at http://localhost:4200, you'll see Ember's default install app, featuring an adorable hamster. His name is Thomster and he is your friend. We're going to replace this, but not properly or carefully, we'll just wipe over the top of it. 
 
+![The Ember Welcome Screen](images/01-welcome-screen.png)
+
 Now would be a pretty good time to make sure whatever editor you use is set up with the new project, or to open the directory, or whatever. Note that while editors often have functionality to make and manage files we shouldn't be needing those. That said, if you have an editor or IDE that has a command line feel free to use that. PHPStorm, Webstorm and Visual Studio Code all definitely do. We'll be using the command line extensively, so having one close will help. 
 
 The first step will be editing the application template. The core container of your site is called `application` for reasons that aren't particularly mysterious, and that's a useful term to use for things that apply to the entire thing. It will come up again. We've currently got that base template as a largely empty file, and we'll fix that now. If you go to `apps/templates` in your editor, you'll see it there now - `application.hbs`. You'll see in there some comments saying that you should feel free to delete the contents.
 
 A .hbs file is a handlebars template file. Not too dissimilar to Laravel's Blade. Much like blade, an empty root template with no sections or yields results in a screen a little more Zen than we want. What it needs is an `{{outlet}}`. There's already one here, so just delete the welcome section above and save it. This is functionally similar to Blade's `@yield`. Add a H1 tag above that outlet, and whatever markup you like (I typically put a `<div class="container">` round everything), save, and we'll get on with it. You'll probably notice that Ember rebuilds everything automatically on your file change, and updates the browser accordingly. Wizards. If you can still see your `ember server` tab you will be able to see what it's building, too. That build process even gives you a heads-up about Javascript standard lint errors, which can often be very useful.
+
+![An impressive start](images/02-with-heading.png)
 
 ## Generating with EmberCLI
 
@@ -52,6 +58,8 @@ ember generate template index
 ~~~~~~~~
 
 That will run the command and create a single empty file. It will be at `app/templates/index.hbs`. If you open that and save an `h2` header into it, you'll see it pop in nearly instantly into the interface we have running in the browser. Ember CLI will build new files into your application, typically in around 0.2 of a second. You don't need to refresh your browser.
+
+![Now with index template and header](images/03-index-header.png)
 
 # Routes in Ember
 
@@ -91,6 +99,8 @@ T> You don't actually have to type `generate`, just typing `ember g` will do the
 If you edit the new `apps/templates/about-us.hbs` you'll see that it's mostly just a blank file with an `{{output}}` entry. Throw a `<h2>About Us</h2>` at the top. Feel free to put in some lorem ipsum text so you can feel like a real designer, and we'll get on with it. You should also make sure you delete the `{{outlet}}`. We're not going to be putting any sub-routes in here or anything. It won't break anything if you leave it there.
 
 Going to that route at `http://localhost:4200/about-us` will show us exactly what we would expect to see.
+
+![The "about us" page with some text](images/04-about-us.png)
 
 A look at `apps/routes/about-us.js` shows us some pretty standard Ember ES6 boilerplate. More complex routes can have things like the model, actions, various lifecycle hooks and properties set in here, but our route is static HTML, so we don't really need any of that. In fact... delete it. Not the content. The whole `about-us.js` file. Seriously, do it. If you take another look at the page, you'll see that nothing's changed. Apparently routes aren't so important after all!
 
@@ -155,6 +165,8 @@ If the `|item|` is throwing you, this is a relatively new syntax apparently has 
 Speaking of which, you should keep the `{{outlet}}` there too, at the bottom. We **will** be pulling content into this for nested subroutes.
 
 If you go back to the browser and put in `http://localhost:4200/todo/` you'll again see that it does exactly what it should.
+
+![Listing out all of the todo items](images/05-list-models.png)
 
 ## Adding some links
 
