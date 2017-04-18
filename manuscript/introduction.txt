@@ -18,9 +18,9 @@ All the same arguments for Laravel can be made for Ember. An Ember application m
 
 The first thing to talk about is the obvious one. Why Ember? Why use Ember instead of the other frameworks around, such as VueJS, Angular, or React? Everyone has things they do and don't like about them, and one person's con can be an person's pro. The reason that I like Ember is that I find it an excellent way to be extremely productive very quickly. To my mind, this is what a framework is for.
 
-Ember is entirely built around the paradigm of the Single Page App. As Ember's webpage calls it, an "ambitious web application". Ambitious as used here doesn't refer to being the next Facebook. A single page app has to handle a lot of different requirements, such as routing, state management, http access, authentication, templating, acceptance testing, string formatting, and so on. All of this is built into Ember. Ember is great at building SPAs. 
+Ember is entirely built around the paradigm of the Single Page App. As Ember's webpage calls it, an "ambitious web application". Ambitious as used here doesn't refer to being the next Facebook. A single page app has to handle a lot of different requirements, such as routing, state management, HTTP access, authentication, templating, acceptance testing, string formatting, and so on. All of this is built into Ember. Ember is great at building SPAs. 
 
-It's a lot less good at other things, though. Not all javascript is an SPA. A lot of the time, complex Javascript is implemented inside an existing app, which is not a good fit for Ember.
+It's a lot less good at other things, though. Not all JavaScript is an SPA. A lot of the time, complex Javascript is implemented inside an existing app, which is not a good fit for Ember.
 
 The long term intention here is to build two SPAs with Ember. The first one, and the one covered by this book, is a  simple app to get our feet wet in a basic Ember implementation. 
 
