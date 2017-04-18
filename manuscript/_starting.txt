@@ -310,9 +310,9 @@ Open your browser debug toolbar with F12 and you'll see a tab for Ember. For the
 
 To get a better idea of our issue here, we need to go to the View Tree tab. 
 
-![The structure of an Ember app - note the empty model object](images/09-ember-inspector.png)
-
 This shows the structure of our application and what data it contains. If you click on the first item in our list, and then look down at the Name column where it says `todo.show` you'll see the Model shows a useful object with our text, checked status, etc. However, if you refresh that individual item, and you'll see the model changes to only include an id. And even that is just coming from the URL. 
+
+![The structure of an Ember app - note the empty model object](images/09-ember-inspector.png)
 
 This pretty much sums up the problem. This route has no actual model.
  
