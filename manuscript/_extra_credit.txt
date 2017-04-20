@@ -101,7 +101,7 @@ export default Ember.Component.extend({
     }
   }
 });
-~~~~~~~~r
+~~~~~~~~
 
 T> It may seem more logical to say `this.isEditing = true;` but Ember need to make sure all of the watchers can watch, and everything stays in sync. Additionally we could make a generic toggleEditing method that swaps the value back and forth, but being explicit here is a little easier to follow, and makes our code a little easier to write.
 
